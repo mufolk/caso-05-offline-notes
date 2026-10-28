@@ -20,14 +20,14 @@
 | REQ-06 | If the text is identical, still add 1. | "…mesmo que o texto enviado seja igual ao anterior." | |
 | REQ-07 | A conflict returns the server's current data. | "Quando a revisão base não corresponder à esperada, retorne conflito e os dados atuais do servidor…" | |
 | REQ-08 | Preserve the server's text and the client's proposal in the operation result. | "Preserve o texto do servidor e a proposta do cliente no resultado dessa operação." | |
-| REQ-09 | An operation with base greater than zero for a non-existent note returns `nota_inexistente`. | "…ou indique que a nota ainda não existe." | |
+| REQ-09 | An operation with base greater than zero for a non-existent note returns `note_not_found`. | "…ou indique que a nota ainda não existe." | |
 | REQ-10 | Do not merge texts automatically. | "Não junte os textos automaticamente…" | |
 | REQ-11 | Do not use the device clock to pick a winner. | "…nem use o relógio do dispositivo para escolher um vencedor." | |
 | REQ-12 | Before processing, check the operation's fields. | "Antes de processar, confira os campos da operação." | |
 | REQ-13 | An invalid operation does not take up an `op_id`. | "Uma operação inválida não ocupa op_id." | |
 | REQ-14 | For every valid operation received for the first time, store its content and result, even if it was a conflict. | "Para cada operação válida recebida pela primeira vez, guarde seu conteúdo e resultado, mesmo que tenha dado conflito." | |
 | REQ-15 | If the same `op_id` arrives again with the same content, return the original result without applying the change again. | "Se o mesmo op_id chegar de novo com o mesmo conteúdo, devolva o resultado original sem aplicar a alteração outra vez." | |
-| REQ-16 | If the same `op_id` arrives with different content, return `id_reutilizado`. | "Se chegar com conteúdo diferente, retorne id_reutilizado." | |
+| REQ-16 | If the same `op_id` arrives with different content, return `id_reused`. | "Se chegar com conteúdo diferente, retorne id_reutilizado." | |
 | REQ-17 | Process the queue in the order received and return one result per operation. | "Processe a fila na ordem recebida e devolva um resultado por operação." | |
 | REQ-18 | An error or conflict does not block the following operations. | "Um erro ou conflito não impede as próximas." | |
 | REQ-19 | The result of a resend may contain stale data: it is the receipt of the original operation. | "O resultado de um reenvio pode conter dados antigos: ele é o recibo da operação original." | |
@@ -39,7 +39,7 @@
 
 ## The statement's own example, as assertions (EX)
 
-The statement walks one sequence over note N. Each line is an executable assertion in `exemplo-do-enunciado.spec.ts`, named after the statement itself. A reviewer opening that file sees his own example passing.
+The statement walks one sequence over note N. Each line is an executable assertion in `exemplo-do-statement.spec.ts`, named after the statement itself. A reviewer opening that file sees his own example passing.
 
 | ID | Step | Expected | Covers |
 |---|---|---|---|
@@ -87,6 +87,6 @@ Not requirements — explicit permissions. Each one is quoted so the README and 
 
 Three things I left deliberately unresolved in Session 0. Two are now closed, each with the pointer that closes it. The third is a note, not a debt.
 
-1. **Closed — REQ-09 names a code the statement does not.** The statement says only "ou indique que a nota ainda não existe". The identifier `nota_inexistente` is a naming decision, not a quote. It is declared in the error taxonomy of RFC-001 §5 and numbered as **ASM-20** in `docs/assumptions.md`.
+1. **Closed — REQ-09 names a code the statement does not.** The statement says only "ou indique que a nota ainda não existe". The identifier `note_not_found` is a naming decision, not a quote. It is declared in the error taxonomy of RFC-001 §5 and numbered as **ASM-20** in `docs/assumptions.md`.
 2. **Closed — the note entity has no REQ of its own.** "Cada nota tem id, texto e um número de revisão." is a model obligation, so it is now **REQ-22**. The sentence has the statement's authority and belongs in this matrix; what the RFC adds on top — *exactly* those three fields, no timestamp, no author, hence no clock to resolve by — is a choice and lives as **ASM-04** in `docs/assumptions.md`.
 3. **REQ-07 and REQ-09 come from one sentence.** They are two outcomes of the same check. Keeping them split is what forces two distinct tests; worth saying so out loud when the reviewer asks why the numbering looks uneven.

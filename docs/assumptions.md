@@ -1,6 +1,6 @@
 # Assumptions (ASM) — Case 05
 
-**What this file is.** Every rule the solution obeys that the statement does **not** decide. The REQ matrix in `docs/reqs.md` is a transcription of the enunciado: each row carries a verbatim quote and has the statement's authority. These rows have no quote, by definition — they are choices, and a reviewer is entitled to disagree with any of them.
+**What this file is.** Every rule the solution obeys that the statement does **not** decide. The REQ matrix in `docs/reqs.md` is a transcription of the statement: each row carries a verbatim quote and has the statement's authority. These rows have no quote, by definition — they are choices, and a reviewer is entitled to disagree with any of them.
 
 **Method.** `docs/rfc/001-protocolo-de-sincronizacao.md` read end to end: every block marked **Own choices**, plus rules stated in prose or in an implementer block that no REQ covers. Raw sweep and the Session 2 build order: `docs/claude/sweep-own-choices.md`.
 
@@ -8,9 +8,11 @@
 
 **Columns.** *What the statement leaves open* is the column that proves the row is an assumption and not a requirement someone forgot to quote. *Kind*: `B` = behaviour a test can prove, so the Proof cell is owed. `A` = architecture or an absence, which no test can observe; its Proof cell reads `—` and the justification lives in an ADR or in the README.
 
-**Counts.** 43 rows: 31 `B`, 12 `A`.
-`B`: 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 24, 25, 27, 29, 30, 31, 32, 33, 34, 35, 37, 38, 39, 40, 41.
+**Counts.** 44 rows: 32 `B`, 12 `A`.
+`B`: 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 24, 25, 27, 29, 30, 31, 32, 33, 34, 35, 37, 38, 39, 40, 41, 44.
 `A`: 1, 2, 3, 15, 21, 22, 23, 26, 28, 36, 42, 43.
+
+ASM-44 has no sweep row: it was decided after the sweep was written. Every other id matches.
 
 ---
 
@@ -25,10 +27,10 @@
 
 | ID | Rule | What the statement leaves open | Kind | Lives in | Proof |
 |---|---|---|---|---|---|
-| ASM-03 | No operation ledger. Truth is the current state of each note plus the receipts. A note cannot be rebuilt from scratch. | The statement requires storing conteúdo and result for every valid first arrival. It never asks that a note be replayable. | A | §3 · ADR-002 | — |
-| ASM-04 | The note is **exactly** `{id, text, revision}` — no timestamp, no author. The entity has no clock field to resolve by. | The quoted obligation is the three fields (pending REQ-22). The exclusion, and the reason for it, is the choice. | B | §3 · REQ-22 | |
+| ASM-03 | No operation ledger. Truth is the current state of each note plus the receipts. A note cannot be rebuilt from scratch. | The statement requires storing content and result for every valid first arrival. It never asks that a note be replayable. | A | §3 · ADR-002 | — |
+| ASM-04 | The note is **exactly** `{id, text, revision}` — no timestamp, no author. The entity has no clock field to resolve by. | The quoted obligation is the three fields, numbered REQ-22. The exclusion, and the reason for it, is the choice. | B | §3 · REQ-22 | |
 | ASM-05 | Lookup of notes and receipts is exact string equality — no trim, no case fold. `"  A  "` and `"A"` are two notes. | Nothing in the statement addresses identity of keys. Risk 5 of §7: the first test that looks like a bug and is not. | B | §3, §4.5 · §7 risk 5 | |
-| ASM-06 | The receipt stores the conteúdo that produced it, not only the result. | "guarde seu conteúdo e resultado" authorises storing it; comparing it on a second arrival is the design choice that makes `id_reutilizado` possible at all. | B | §3, §5 | |
+| ASM-06 | The receipt stores the content that produced it, not only the result. | "guarde seu conteúdo e resultado" authorises storing it; comparing it on a second arrival is the design choice that makes `id_reused` possible at all. | B | §3, §5 | |
 
 ## Predicates (RFC §4.1)
 
@@ -41,18 +43,18 @@
 | ASM-11 | `text: ""` is legal. | The statement says *texto*, not *texto não vazio*, and REQ-06 increments on identical text. | B | §4.1 | |
 | ASM-12 | `base_revision` is a finite integer `>= 0`. `Number.isInteger` rejects strings, bigints, `null` and `undefined` before the range check. | "número de revisão" is the only wording. `-1` fails. | B | §4.1 | |
 | ASM-13 | `-0` passes the predicate and `===` treats it as `0` in the fingerprint. | Nowhere near the statement. A JavaScript edge, decided rather than discovered. | B | §4.1 | |
-| ASM-14 | Conteúdo is `{note_id, base_revision, text}`, compared with `===` per field. `op_id` is the key, never part of the fingerprint. | "com o mesmo conteúdo" never defines conteúdo. This definition is the whole of REQ-15 and REQ-16. **Two halves:** the shape is a type, written in Stage 1; the comparison rule is what the Proof cell owes. | B | §4.1 | |
+| ASM-14 | Content is `{note_id, base_revision, text}`, compared with `===` per field. `op_id` is the key, never part of the fingerprint. | "com o mesmo conteúdo" never defines content. This definition is the whole of REQ-15 and REQ-16. **Two halves:** the shape is a type, written in Stage 1; the comparison rule is what the Proof cell owes. | B | §4.1 | |
 | ASM-15 | No length cap on `text`, `op_id` or `note_id` in the core. The bound lives at the HTTP edge, where body size is already limited. | Silent. An absence — nothing to assert. | A | §4.1 · ADR-005 | — |
 
 ## Revision table (RFC §4.2)
 
 | ID | Rule | What the statement leaves open | Kind | Lives in | Proof |
 |---|---|---|---|---|---|
-| ASM-16 | One `conflito` covers both sides of the mismatch: `base < revision` and `base > revision`. | "Quando a revisão base não corresponder à esperada" draws no distinction. A fifth result would be a protocol we were not given. Trigger: more than one server. | B | §4.2 | |
-| ASM-17 | Base `0` on a live note is the mismatch row — `conflito`, not a reset and not a create. | The statement gives base 0 only as the create path. `note?.revision ?? 0` collapses this row silently. | B | §4.2 | |
+| ASM-16 | One `conflict` covers both sides of the mismatch: `base < revision` and `base > revision`. | "Quando a revisão base não corresponder à esperada" draws no distinction. A fifth result would be a protocol we were not given. Trigger: more than one server. | B | §4.2 | |
+| ASM-17 | Base `0` on a live note is the mismatch row — `conflict`, not a reset and not a create. | The statement gives base 0 only as the create path. `note?.revision ?? 0` collapses this row silently. | B | §4.2 | |
 | ASM-18 | The exact key list of each receipt type. | "Preserve o texto do servidor e a proposta do cliente" names what to preserve, not the keys. | B | §4.2 | |
-| ASM-19 | The `nota_inexistente` receipt carries the client text only — no server text, no server revision, because neither exists. | Not addressed. It is also what keeps this result distinct from `conflito`. | B | §4.2 | |
-| ASM-20 | The token `nota_inexistente`. | "indique que a nota ainda não existe" names the branch, never the code. Open point 1 of `docs/reqs.md`. | B | §4.2, §5 | |
+| ASM-19 | The `note_not_found` receipt carries the client text only — no server text, no server revision, because neither exists. | Not addressed. It is also what keeps this result distinct from `conflict`. | B | §4.2 | |
+| ASM-20 | The token `note_not_found`. | "indique que a nota ainda não existe" names the branch, never the code. Open point 1 of `docs/reqs.md`. | B | §4.2, §5 | |
 
 ## Unit of work and lock (RFC §4.3)
 
@@ -75,7 +77,7 @@ ADR pointers are deliberately absent from ASM-21, ASM-22 and ASM-28: they land o
 | ID | Rule | What the statement leaves open | Kind | Lives in | Proof |
 |---|---|---|---|---|---|
 | ASM-30 | An empty queue returns `[]`. | "devolva um resultado por operação" says nothing about zero operations. | B | §4.4 | |
-| ASM-31 | No snapshot at the start of a batch: operation *k+1* sees the note and the registry as of *k*. | Implied by the statement's own example; a snapshot turns the official `[O1, O2, O3]` into three frozen `nota_inexistente` receipts. | B | §4.4 | |
+| ASM-31 | No snapshot at the start of a batch: operation *k+1* sees the note and the registry as of *k*. | Implied by the statement's own example; a snapshot turns the official `[O1, O2, O3]` into three frozen `note_not_found` receipts. | B | §4.4 | |
 
 ## Query (RFC §4.5)
 
@@ -83,19 +85,20 @@ ADR pointers are deliberately absent from ASM-21, ASM-22 and ASM-28: they land o
 |---|---|---|---|---|---|
 | ASM-32 | `query` returns its own result type, outside the operation taxonomy. | "Uma consulta separada" asks for a separate path, not a separate type. Folding a read into the op union would make `invalid` speak about an `op_id` it does not have. | B | §4.5 | |
 | ASM-33 | `malformed` applies the same `note_id` predicate, takes no lock, and is not `invalid`. | Silent. There is no `op_id` to resend; the caller fixes the argument. | B | §4.5 | |
-| ASM-34 | `absent` is not `nota_inexistente`. One is live, the other is a stored receipt. A later create flips `query` and leaves the receipt alone. | Silent, and the easiest pair in the protocol to collapse into one code. | B | §4.5 | |
+| ASM-34 | `absent` is not `note_not_found`. One is live, the other is a stored receipt. A later create flips `query` and leaves the receipt alone. | Silent, and the easiest pair in the protocol to collapse into one code. | B | §4.5 | |
 | ASM-35 | `found` echoes the argument as `note_id`. No separate `id`, no timestamp, no receipts. | Silent. | B | §4.5 | |
 | ASM-36 | No list of notes. No `query(op_id)`. | "mostrar a nota" is singular. An absence. | A | §4.5 | — |
-| ASM-37 | **Allowance:** a client may send its next operation with `base_revision` taken from its own `accepted` receipt. A `conflito` receipt never qualifies — its revision is frozen. | The statement's live base is always `query`, yet the official table runs on the accepted revision. Without this allowance the statement's own example needs a `query` it never shows. | B | §4.5 | |
+| ASM-37 | **Allowance:** a client may send its next operation with `base_revision` taken from its own `accepted` receipt. A `conflict` receipt never qualifies — its revision is frozen. | The statement's live base is always `query`, yet the official table runs on the accepted revision. Without this allowance the statement's own example needs a `query` it never shows. | B | §4.5 | |
 
 ## Taxonomy (RFC §5)
 
 | ID | Rule | What the statement leaves open | Kind | Lives in | Proof |
 |---|---|---|---|---|---|
 | ASM-38 | The token `accepted`. | The statement describes the write and never names the result. | B | §5 | |
-| ASM-39 | `id_reutilizado` is not stored. The first receipt remains the only row for that `op_id`. | "retorne id_reutilizado" says return, not store. | B | §5 | |
-| ASM-40 | `id_reutilizado` returns `{type, op_id}` only — never the stored receipt, never the colliding payload. | The statement says what to return on reuse: nothing. The courteous version turns `op_id` into an oracle over other clients' text. | B | §5 · ADR-003 | |
+| ASM-39 | `id_reused` is not stored. The first receipt remains the only row for that `op_id`. | "retorne id_reutilizado" says return, not store. | B | §5 | |
+| ASM-40 | `id_reused` returns `{type, op_id}` only — never the stored receipt, never the colliding payload. | The statement says what to return on reuse: nothing. The courteous version turns `op_id` into an oracle over other clients' text. | B | §5 · ADR-003 | |
 | ASM-41 | `invalid` returns `{type, errors}` with predicate names only, never values, and carries no `op_id` — the result must not read as a reservation. | Silent. The missing `op_id` is the semantic point. | B | §5 | |
+| ASM-44 | Every identifier in the code is English, result tokens included: `conflict`, `id_reused`, `note_not_found`. The statement's own tokens survive only inside the verbatim quotes and in the bridge column of RFC-001 §5. | The statement hands over two of these tokens already named — *conflito* and *id_reutilizado* — and a reviewer may grep for them. Translating is a choice: it buys one language across types, tests and prose, and costs the literal grep. §5 pays that cost back by mapping each English token to the statement's word. *note_not_found* was never given a name (ASM-20), so only its language is new. | B | §5 | |
 
 ## Assumptions proper (RFC §7)
 
@@ -108,7 +111,7 @@ ADR pointers are deliberately absent from ASM-21, ASM-22 and ASM-28: they land o
 
 ## Open items
 
-1. **REQ-22 is owed in `docs/reqs.md`.** "Cada nota tem id, texto e um número de revisão." is a sentence of the enunciado carrying an obligation, and the matrix does not yet number it. ASM-04 cites it and records only the exclusion — no timestamp, no author. Until REQ-22 exists, ASM-04 points at nothing. This closes open point 2 of `reqs.md`, and it closes it in the matrix, not here. Mine to flag, Gui's to write.
-2. **Two Proof cells that Stage 1 will not fill.** ASM-05 is pure behaviour, with no type to write. ASM-14 has a type half — the conteúdo shape, written in Stage 1 — and a behaviour half, the `===` per field with `op_id` excluded. Nine of Stage 1's ten rows are shapes; these two still owe tests.
-3. **ADR pointers deferred** for ASM-21, ASM-22 and ASM-28, pending the ADR-008 / ADR-009 decision recorded in `claude/notas-gatilhos-adr-inventario.md`.
+1. **Closed — REQ-22.** "Cada nota tem id, texto e um número de revisão." is a sentence of the statement carrying an obligation, so it is numbered REQ-22 in `docs/reqs.md`, with the verbatim quote. ASM-04 cites it and records only the exclusion — no timestamp, no author, hence no clock to resolve by. Open point 2 of `reqs.md` closed with it.
+2. **Two Proof cells that Stage 1 will not fill.** ASM-05 is pure behaviour, with no type to write. ASM-14 has a type half — the content shape, written in Stage 1 — and a behaviour half, the `===` per field with `op_id` excluded. Nine of Stage 1's ten rows are shapes; these two still owe tests.
+3. **ADR pointers deferred** for ASM-21, ASM-22 and ASM-28, pending the ADR-008 / ADR-009 decision recorded in `docs/claude/adr-review-trigger-inventory.md`.
 4. **ASM-03 and the plan's ADR-002 title.** `docs/plano-de-ataque.md` describes ADR-002 as "ledger of operations as truth; note state is a projection". RFC-001 §3 decided the opposite, and ASM-03 follows the RFC. The plan is reference material and is left untouched; the correction belongs in the ADR-002 title when it is written in Session 4.

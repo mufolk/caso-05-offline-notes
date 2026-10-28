@@ -1,8 +1,8 @@
 # RFC-001 — Sync protocol for offline notes
 
-**Status:** Aceito · **Date:** 2026-10-28 · **Author:** Gui · **File:** `docs/rfc/001-protocolo-de-sincronizacao.md`
+**Status:** Accepted · **Date:** 2026-10-28 · **Author:** Gui · **File:** `docs/rfc/001-protocolo-de-sincronizacao.md`
 
-Quotes from the problem statement are kept in the original Portuguese, word for word. The body is the protocol accepted after the red-team pass of 2026-10-27/28. Own choices — rules the statement does not give — are marked as such. The requirements matrix (`docs/requisitos.md`) is extracted from the enunciado, not from this file; this RFC is the pointer column, not the source of the REQs.
+Quotes from the problem statement are kept in the original Portuguese, word for word. The body is the protocol accepted after the red-team pass of 2026-10-27/28. Own choices — rules the statement does not give — are marked as such. The requirements matrix (`docs/reqs.md`) is extracted from the statement, not from this file; this RFC is the pointer column, not the source of the REQs.
 
 ---
 
@@ -34,9 +34,9 @@ Three entities. The note has no timestamp and no author. The statement forbids a
 
 - **Note:** `id`, `text`, `revision`. Starts with no notes on the server.
 - **Operation** (client-generated `op_id`): `op_id`, `note_id`, `base_revision`, `text`.
-- **Receipt:** the stored result of a valid first arrival, plus the conteúdo that produced it.
+- **Receipt:** the stored result of a valid first arrival, plus the content that produced it.
 
-Source of truth = the current state of each note plus the receipts. There is no operation ledger. Receipts already store every valid operation with its conteúdo and result, so nothing disappears silently. The price: a note cannot be rebuilt from scratch (ADR-002).
+Source of truth = the current state of each note plus the receipts. There is no operation ledger. Receipts already store every valid operation with its content and result, so nothing disappears silently. The price: a note cannot be rebuilt from scratch (ADR-002).
 
 Lookup of notes and receipts is **exact string equality**. No trim, no case fold. `"  A  "` and `"A"` are two notes. Own choice: we refused coercion; this is the cost.
 
@@ -47,8 +47,8 @@ Lookup of notes and receipts is **exact string equality**. No trim, no case fold
 Fixed order for `process`:
 
 1. **Predicates** → `invalid` (nothing stored, registry not consulted).
-2. **Registry lookup** (inside the unit of work) → same conteúdo: original receipt; different conteúdo: `id_reutilizado` (does not write).
-3. **Revision table** → `nota_inexistente` / `conflito` / apply.
+2. **Registry lookup** (inside the unit of work) → same content: original receipt; different content: `id_reused` (does not write).
+3. **Revision table** → `note_not_found` / `conflict` / apply.
 4. **Write** the receipt every Step-3 row names; rows that apply also write the note. Same transaction.
 
 An error or conflict never blocks the next operations in the queue: one result per operation, in the order received.
@@ -68,7 +68,7 @@ A payload that fails this check is not an operation. It does not “chegar”. T
 - `op_id` / `note_id`: non-empty after trim. UUID is not required (the official table uses O1).
 - `text: ""` is legal. The statement says texto, not texto não vazio, and increments on identical text.
 - `base_revision` is a finite integer `>= 0`. The statement says “número de revisão”; this is the closed reading.
-- Conteúdo of a valid op is `{note_id, base_revision, text}` with `===` on each field. `op_id` is the key, not the fingerprint.
+- Content of a valid op is `{note_id, base_revision, text}` with `===` on each field. `op_id` is the key, not the fingerprint.
 - No length cap on `text`, `op_id`, or `note_id` in the core. The bound lives at the HTTP edge, where the body size is already limited.
 
 **Shape.** The payload must be a plain object (`typeof === "object"`, not `null`, not an array, prototype `Object.prototype` or `null`). Anything else — string, `null`, array, `Date`, class instance — is `invalid`. An empty array has no extra enumerable keys; that is why this line exists.
@@ -92,12 +92,12 @@ Whitespace-only `op_id` or `note_id` (`"   "`) → `invalid`. `"  A  "` is valid
 if not a plain object → invalid
 if own enumerable keys ≠ {op_id, note_id, base_revision, text} → invalid
 if any per-field predicate fails → invalid
-else the payload is an operation; conteúdo = {note_id, base_revision, text}
+else the payload is an operation; content = {note_id, base_revision, text}
 ```
 
 ### 4.2 Revision table (Step 3)
 
-Runs only for a **valid first arrival**. Predicates have passed. The registry has no receipt for this `op_id`. Resend and `id_reutilizado` never reach this table.
+Runs only for a **valid first arrival**. Predicates have passed. The registry has no receipt for this `op_id`. Resend and `id_reused` never reach this table.
 
 Authority: *“Uma nota é criada na revisão 1 quando o cliente envia a revisão base 0.”* *“Para alterar uma nota existente, a revisão base deve ser igual à revisão atual no servidor. Se for aceita, a alteração troca o texto e aumenta a revisão em 1, mesmo que o texto enviado seja igual ao anterior.”* *“Quando a revisão base não corresponder à esperada, retorne `conflito` e os dados atuais do servidor, ou indique que a nota ainda não existe. Preserve o texto do servidor e a proposta do cliente no resultado dessa operação.”*
 
@@ -106,43 +106,43 @@ Authority: *“Uma nota é criada na revisão 1 quando o cliente envia a revisã
 | Note | `base_revision` | Result |
 |---|---|---|
 | missing | `=== 0` | apply: create at revision 1, text as sent |
-| missing | `>= 1` | `nota_inexistente` |
+| missing | `>= 1` | `note_not_found` |
 | exists | `=== note.revision` | apply: replace text, revision + 1, even if the text is identical |
-| exists | `!== note.revision` | `conflito` — includes base 0 on an existing note |
+| exists | `!== note.revision` | `conflict` — includes base 0 on an existing note |
 
 Every row of this table writes a receipt. Rows 1 and 3 also write the note. Rows 2 and 4 are not reads.
 
 On apply (rows 1 and 3): the note is only `{id, text, revision}`. Nothing else changes. No timestamp, no author.
 
-`nota_inexistente` is the statement’s second branch, not a third outcome. The table only makes the choice total. Create is row 1 only. Base 0 on a live note is row 4, not a reset.
+`note_not_found` is the statement’s second branch, not a third outcome. The table only makes the choice total. Create is row 1 only. Base 0 on a live note is row 4, not a reset.
 
 Row 4 covers `base < revision` (ordinary concurrent edit) and `base > revision` (a revision this server has never issued). Both are “base not the expected one”. The statement draws no distinction. A fifth result is a protocol we were not given.
 
 **Own choices**
 
-- One `conflito` for both sides of row 4. Trigger: more than one server — then a base ahead of the local revision is worth logging as its own signal; it still returns `conflito` unless replication has started.
+- One `conflict` for both sides of row 4. Trigger: more than one server — then a base ahead of the local revision is worth logging as its own signal; it still returns `conflict` unless replication has started.
 - Receipt field lists below (the statement names what to preserve, not the exact keys).
 
 **Receipts** (valid first arrival; note mutation and receipt persist are one unit-of-work transaction):
 
 - **accepted:** `op_id`, `type: "accepted"`, `note_id`, `text` as stored, `revision` after apply.
-- **conflito:** `op_id`, `type: "conflito"`, `note_id`, `base_revision` sent, `server_text`, `server_revision` frozen at this moment, `client_text`. Both texts, as required. Two texts cannot share the key `text`; `text` stays on the note, on `accepted` and on query `found` (ASM-18).
-- **nota_inexistente:** `op_id`, `type: "nota_inexistente"`, `note_id`, `base_revision` sent, `client_text`. No `server_text`, no `server_revision` — they do not exist, and the absence is visible in the type (ASM-19). This is not `conflito`. It is not query `absent`.
+- **conflict:** `op_id`, `type: "conflict"`, `note_id`, `base_revision` sent, `server_text`, `server_revision` frozen at this moment, `client_text`. Both texts, as required. Two texts cannot share the key `text`; `text` stays on the note, on `accepted` and on query `found` (ASM-18).
+- **note_not_found:** `op_id`, `type: "note_not_found"`, `note_id`, `base_revision` sent, `client_text`. No `server_text`, no `server_revision` — they do not exist, and the absence is visible in the type (ASM-19). This is not `conflict`. It is not query `absent`.
 
 **Implementer**
 
 ```
 if note missing && base === 0 → write note {id: note_id, text, revision: 1}; receipt accepted (revision 1)
-if note missing && base >= 1 → receipt nota_inexistente
+if note missing && base >= 1 → receipt note_not_found
 if note exists && base === note.revision → write note {…, text, revision: note.revision + 1}; receipt accepted
-if note exists && base !== note.revision → receipt conflito (freeze today's server text and revision)
+if note exists && base !== note.revision → receipt conflict (freeze today's server text and revision)
 ```
 
 ### 4.3 Unit of work and lock
 
 `process` and `query` are the two entry points. Both take the unit of work. The lock is a property of the unit of work, not of `process`.
 
-The statement does not name a lock, a transaction, or `async`. It names the facts this section has to keep true: one result per operation, in arrival order; a valid first arrival stores conteúdo and result, including `conflito`; a resend does not apply again; a separate query shows the note as it is now.
+The statement does not name a lock, a transaction, or `async`. It names the facts this section has to keep true: one result per operation, in arrival order; a valid first arrival stores content and result, including `conflict`; a resend does not apply again; a separate query shows the note as it is now.
 
 **Own choices**
 
@@ -190,11 +190,11 @@ The empty `catch` on `tail` keeps a rejection from killing the queue. The caller
 if predicates fail → return invalid          // no lock, no I/O
 return uow.run(() => {
   existing = receipts.get(op_id)             // exact string equality
-  if existing && same conteúdo → return existing
-  if existing && different conteúdo → return id_reutilizado
+  if existing && same content → return existing
+  if existing && different content → return id_reused
   compute Step 3 against current notes       // reads only
   if that row writes a note → notes.set(...)
-  receipts.set(op_id, { conteúdo, receipt }) // every Step-3 row
+  receipts.set(op_id, { content, receipt }) // every Step-3 row
   return receipt
 })
 ```
@@ -213,11 +213,11 @@ Authority: *“Processe a fila na ordem recebida e devolva um resultado por oper
 processAll(ops, uow) → for (op of ops) await process(op, uow)
 ```
 
-Same length, same index. Op *k+1* sees note and registry after *k*. Empty queue → `[]`. Snapshot-at-start of the batch is forbidden: it turns the official `[O1, O2, O3]` into frozen `nota_inexistente` receipts.
+Same length, same index. Op *k+1* sees note and registry after *k*. Empty queue → `[]`. Snapshot-at-start of the batch is forbidden: it turns the official `[O1, O2, O3]` into frozen `note_not_found` receipts.
 
 ### 4.5 Query
 
-A second entry point. Not an operation. No `op_id`, no conteúdo, no receipt.
+A second entry point. Not an operation. No `op_id`, no content, no receipt.
 
 Authority: *“Uma consulta separada deve mostrar a nota como está agora.”* *“O resultado de um reenvio pode conter dados antigos: ele é o recibo da operação original.”* *“Para resolver um conflito, permita enviar outra operação, com novo `op_id`, o texto escolhido e a revisão base atual.”*
 
@@ -233,7 +233,7 @@ QueryResult =
 | Result | Meaning |
 |---|---|
 | `malformed` | `note_id` failed the same predicate as an op (plain string, non-empty after trim). No lock. The caller fixes the argument and calls `query` again. Not `invalid`. No `op_id` to resend. |
-| `absent` | No note with that id **now**. Not `nota_inexistente`. That name is a stored receipt of a valid op. A later create makes the next `query` return `found`; the old receipt stays `nota_inexistente`. |
+| `absent` | No note with that id **now**. Not `note_not_found`. That name is a stored receipt of a valid op. A later create makes the next `query` return `found`; the old receipt stays `note_not_found`. |
 | `found` | The note as it is now. `note_id` echoes the argument, which is `note.id`. No separate `id`. |
 
 Lookup is exact string equality. `query("A")` after a create with `"  A  "` returns `absent`.
@@ -243,15 +243,15 @@ Lookup is exact string equality. `query("A")` after a create with `"  A  "` retu
 - A distinct result type. Putting a read in the operation table would make `invalid` talk about `op_id` it does not have.
 - No list of notes. No `query(op_id)`. The statement asks for one note, as it is now. Replay of a receipt is a resend of that valid op.
 - `query` takes `uow.run` so a Postgres UoW cannot show a note without its receipt. In memory that window does not exist; the lock stays so the adapters do not diverge.
-- **Allowance, not a requirement:** a client may send the next op with `base_revision` equal to the revision on its own `accepted` receipt. That is how the official table runs. The statement’s live base is always `query`. The moment another writer may have landed, `query` is current. An `accepted` revision is only known to be current for the client that just wrote, and only until someone else writes. A `conflito` receipt is not in this allowance — its revision is frozen.
+- **Allowance, not a requirement:** a client may send the next op with `base_revision` equal to the revision on its own `accepted` receipt. That is how the official table runs. The statement’s live base is always `query`. The moment another writer may have landed, `query` is current. An `accepted` revision is only known to be current for the client that just wrote, and only until someone else writes. A `conflict` receipt is not in this allowance — its revision is frozen.
 
-**Resolution is not a verb.** After `conflito`:
+**Resolution is not a verb.** After `conflict`:
 
 1. Keep the frozen pair of texts from that receipt (or resend the same valid op to get it back).
 2. `query(note_id)` → live text and live revision.
 3. New `op_id`, chosen text, `base_revision =` that revision.
 
-Using the frozen revision after the official O4 (receipt says 2, `query` says 3) is another `conflito`. That is OCC, not a bug.
+Using the frozen revision after the official O4 (receipt says 2, `query` says 3) is another `conflict`. That is OCC, not a bug.
 
 **Implementer**
 
@@ -276,21 +276,21 @@ Authority: *“Uma operação inválida não ocupa `op_id`.”* *“Para cada op
 
 A payload is an operation only after the predicates. “Chegar de novo” means a **valid** second arrival.
 
-| Result | Statement | Writes a receipt? | What a later **valid** payload with this `op_id` does |
+| Result | The statement's word | Writes a receipt? | What a later **valid** payload with this `op_id` does |
 |---|---|---|---|
-| `invalid` | não ocupa `op_id` | no | This result does not speak about the registry. If no receipt exists, the next valid payload occupies. If one exists, that payload is a resend or `id_reutilizado`. |
-| `id_reutilizado` | `id_reutilizado` | no — a receipt already exists for this id | This message is discarded. The stored receipt is unchanged. |
-| `accepted` | — | yes | Same conteúdo → that receipt, no apply. Different conteúdo → `id_reutilizado`. |
-| `conflito` | `conflito` | yes | Same. Frozen pair stays frozen. |
-| `nota_inexistente` | “indique que a nota ainda não existe” | yes | Same. Stale if the note is later created. |
+| `invalid` | não ocupa `op_id` | no | This result does not speak about the registry. If no receipt exists, the next valid payload occupies. If one exists, that payload is a resend or `id_reused`. |
+| `id_reused` | *id_reutilizado* | no — a receipt already exists for this id | This message is discarded. The stored receipt is unchanged. |
+| `accepted` | — | yes | Same content → that receipt, no apply. Different content → `id_reused`. |
+| `conflict` | *conflito* | yes | Same. Frozen pair stays frozen. |
+| `note_not_found` | “indique que a nota ainda não existe” | yes | Same. Stale if the note is later created. |
 
 There is no column “`invalid` ⇒ id reusable”. Reusability is a property of the registry, not of this message.
 
 **Own choices**
 
 - `accepted` is our name. The statement describes the write, not the token.
-- `id_reutilizado` is not stored. The first receipt remains the only row for that `op_id`.
-- `id_reutilizado` returns `{ type: "id_reutilizado", op_id }` only. It does not return the stored receipt or the other payload. A colliding `op_id` must not leak another client’s text.
+- `id_reused` is not stored. The first receipt remains the only row for that `op_id`.
+- `id_reused` returns `{ type: "id_reused", op_id }` only. It does not return the stored receipt or the other payload. A colliding `op_id` must not leak another client’s text.
 - `invalid` returns `{ type: "invalid", errors }` where `errors` names the failed predicates (e.g. `"not_plain_object"`, `"extra_keys"`, `"op_id"`, `"base_revision"`). Names only, never values. No `op_id` on this result — the result must not look like a reservation.
 
 **Implementer**, after the predicates:
@@ -298,8 +298,8 @@ There is no column “`invalid` ⇒ id reusable”. Reusability is a property of
 ```
 if not an operation → return invalid; stop
 existing = receipts.get(op_id)
-if existing && same conteúdo → return existing receipt; do not apply
-if existing && different conteúdo → return id_reutilizado; do not write
+if existing && same content → return existing receipt; do not apply
+if existing && different content → return id_reused; do not write
 if no existing → Step 3; write the receipt that row names
 ```
 
@@ -319,7 +319,7 @@ A stored receipt never changes. A resend may be stale. `query` is now.
 ## 7. Risks and open questions
 
 1. **Receipts grow forever.** We do not know how long they must be kept. Delete one before a client resends, and that operation is applied twice.
-2. **`op_id` collisions.** Two devices picking the same `op_id` get `id_reutilizado` or, on a first-arrival race the lock missed, a false receipt. Assumption: `op_id`s are practically unique. Predicates do not enforce UUID format (the official example uses O1).
+2. **`op_id` collisions.** Two devices picking the same `op_id` get `id_reused` or, on a first-arrival race the lock missed, a false receipt. Assumption: `op_id`s are practically unique. Predicates do not enforce UUID format (the official example uses O1).
 3. **Starvation on busy notes.** Someone resolving a conflict can keep losing the race, because every new op is already stale on arrival.
 4. **Plausible but wrong LLM merges.** The model can drop or invent a sentence and a hurried user accepts it. Mitigation: never auto-accept; the proposal is an ordinary op (ADR-010).
 5. **Whitespace identities.** Exact-match lookup plus “store as sent” means inconsistent padding addresses different notes. Declared in §3 and §4.5. The first two-line test that looks like a bug is this; it is not a bug.
@@ -332,7 +332,7 @@ Closed by this revision (were open in the proposal): Step 3 was not total; `inva
 
 Seven sessions: 0 requirements matrix · 1 this RFC · 2 pure core · 3 envelope (NestJS + React screen) · 4 ADRs, README, LLM adapter · 5 adversarial verification · 6 video.
 
-Session 0 is still outstanding: `docs/requisitos.md` is extracted from the enunciado, then this file is the pointer column. Any REQ with no section here is a sentence the RFC missed.
+Session 0 is closed: `docs/reqs.md` carries 22 numbered REQs, and every one of them was walked against a section of this file on 2026-10-28 — none was left without a home. The choices this file makes that the statement does not give are numbered separately in `docs/assumptions.md`.
 
 Cut order if time runs short: the React screen goes first, NestJS stays. The core, the ADRs and the README are never cut.
 
@@ -346,11 +346,11 @@ Two devices, note N. After this RFC, the sequence must hold without a special ca
 |---|---|---|
 | O1 | base 0, “início” | accepted, N revision 1 |
 | O2 | base 1, “edição A” | accepted, N revision 2 |
-| O3 | base 1, “edição B” | `conflito`; N keeps “edição A”; receipt freezes revision 2 and both texts |
-| Resend O2 | same conteúdo | original accepted receipt for revision 2; no second apply |
+| O3 | base 1, “edição B” | `conflict`; N keeps “edição A”; receipt freezes revision 2 and both texts |
+| Resend O2 | same content | original accepted receipt for revision 2; no second apply |
 | O4 | base 2, “A + B” | accepted, N revision 3 |
-| Resend O3 | same conteúdo | original `conflito` at revision 2 |
+| Resend O3 | same content | original `conflict` at revision 2 |
 | `query(N)` | — | `found`, revision 3, text “A + B” |
-| O2 with other text | — | `id_reutilizado` |
+| O2 with other text | — | `id_reused` |
 
-O3’s client resolving from the frozen revision 2 after O4 gets another `conflito`. They `query`, then send a new `op_id` with base 3.
+O3’s client resolving from the frozen revision 2 after O4 gets another `conflict`. They `query`, then send a new `op_id` with base 3.
