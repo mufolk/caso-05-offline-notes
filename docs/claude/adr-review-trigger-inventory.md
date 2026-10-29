@@ -1,6 +1,6 @@
 # Inventory of raw material for the review triggers
 
-**Status:** raw material from before the fields were written. Decision and Review trigger now live in `docs/adr/`, filled 2026-10-29. This file is not those fields. ADR-008 and ADR-009 are not filed: folded into ADR-005 as seams on 2026-10-29. One correction in the ADR-001 block: starvation is risk 3 of RFC-001 §7, not risk 4. Risk 4 is the model, ADR-010.
+**Status:** raw material from before the fields were written. Decision and Review trigger now live in `docs/adr/`, filled 2026-10-29. This file is not those fields. ADR-008 and ADR-009 are not filed: folded into ADR-005 as seams on 2026-10-29. Two citations were already wrong against the accepted §7, which has not been renumbered in this repo: the first commit of that section has the same five items it has now. Starvation is risk 3, not risk 4; risk 4 is the model, ADR-010. Atomicity of the revision check and the write is not a numbered risk; risk 2 is `op_id` collisions. The separate write step is one of the proposal items §7 says this revision closed, and the closing note does not give it a number.
 **Date:** 2026-10-28
 **Source:** RFC-001 §7 (risks), pending items from Session 0, and the conversations of 27 and 28 October.
 **Imported into the repo:** 2026-10-28, from the project workbench. English, content unchanged except where a later decision is noted.
@@ -97,11 +97,23 @@ No inventory block existed for this one. The fact in the Review trigger — a cl
 
 ---
 
+## ADR-006 — errors as values
+
+No inventory block existed for this one. The fact in the Review trigger — a domain outcome arriving as a rejection of `uow.run`, so the queue continues only because something swallowed it — was written with the field on 2026-10-29.
+
+---
+
+## ADR-007 — closed predicates, no validation library
+
+No inventory block existed for this one. The fact in the Review trigger — one payload getting two answers, `check` accepting what a second checker rejects, or the reverse — was written with the field on 2026-10-29.
+
+---
+
 ## ADR-008 and ADR-009 — folded into ADR-005 as seams
 
 **Settled 2026-10-29: path 2.** Not filed. Not kept as intent ADRs. Not cut. Both describe SQL that is not in the repo, so neither is an accepted decision about code that exists. They are named seams of ADR-005: a future constraint that mirrors an invariant, and the optimistic lock as `UPDATE … WHERE revision = $base`. They become their own ADRs when an adapter is written. ASM-21, ASM-22, ASM-26 and ASM-28 point at ADR-005. The facts below stay ingredients for that split. They are not ADR-005's review trigger. That trigger is the duplicated rule, chosen in the settled block at the top.
 
-**Related observable fact (risk 2 of RFC-001 §7):** the revision check and the write have to be atomic. Two concurrent requests on the same note can both pass the revision comparison. In memory it is free; in the envelope it is not. That is exactly what ADR-009 exists to solve.
+**Related observable fact:** the revision check and the write have to be atomic. Two concurrent requests on the same note can both pass the revision comparison. In memory it is free; in the envelope it is not. This is not a numbered risk in RFC-001 §7 — risk 2 there is `op_id` collisions. It is the seam ADR-009 would have been. That ADR is not filed; the seam is named in ADR-005 until an adapter is written.
 
 **Second observable fact (ASM-26).** A Postgres `query` exists and is a plain `SELECT` at READ COMMITTED. The core suite stops being evidence about reads. In-memory `query` holds the writer lock for the whole read, so it cannot produce the read that observes a note at revision N+1 before, or without, the matching receipt.
 
