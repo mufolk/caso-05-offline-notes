@@ -57,10 +57,10 @@
 | 23 | Hand-rolled mutex, no package, so `packages/core` keeps zero dependencies. | Silent. ADR-005. | A |
 | 24 | Predicates run before the lock and before any I/O; they never touch the registry. | "Uma operação inválida não ocupa `op_id`" forbids the write; running before the lock is the stronger choice on top of it. | B |
 | 25 | Registry lookup, note write and receipt write are one locked transaction. | Silent in memory; risk 2 of §7 in the envelope. The invariant is observable: no note without its receipt. | B |
-| 26 | `query` takes the same lock, purely so the in-memory and Postgres adapters do not diverge. | Silent. Costs nothing in memory. | A |
-| 27 | `run` is not reentrant — the batch fold must be `for (op of ops) await process(op, uow)`, never `run(() => loop)`. | Silent. Gets it wrong and the queue deadlocks rather than misbehaving. | B |
+| 26 | `query` takes the same global writer lock. In-memory `query` is deliberately stronger than a Postgres `query` at READ COMMITTED. | Silent. Single process, one writer, no concurrent readers to starve. The read is trivially consistent. The core suite cannot produce the skew a plain `SELECT` can. | A |
+| 27 | `run` is not reentrant — the batch fold must be `for (op of ops) await process(op, uow)`, never `run(() => loop)`. | Silent. Re-entry is the race after a macrotask drain. The fold is held by review of `processAll`: the queue tests stay green either way, and a wrapped fold hangs rather than fails. `processAll` also owes REQ-18: a conflict in the middle, one result per operation, in order. | B |
 | 28 | No `await` after the first write, because the in-memory UoW has no rollback. Compute the receipt, then write. | Silent. Postgres gets the pair free with `ROLLBACK`. | A |
-| 29 | The empty `catch` on `tail`, so one rejection does not kill the queue while the caller still sees the error. | Silent. Directly serves REQ-18, but the mechanism is the choice. | B |
+| 29 | The empty `catch` on `tail`, so one rejection does not kill the queue while the caller still sees the error. | Silent. Covers a thrown callback only. A conflict is a value and never reaches this catch. REQ-18's batch is ASM-27; the mechanism is ADR-006. | B |
 
 ## §4.4 — Queue
 
@@ -175,8 +175,8 @@ Written by hand. Every row here is a type decision, so it is cheapest now and ex
 | # | Rule | Breaks first at |
 |---|---|---|
 | 25 | Lookup, note write and receipt write are one locked transaction | an `await` slipped between the two `Map.set`s |
-| 27 | `run` is not reentrant — the fold is `for (op of ops) await process(op, uow)` | wrapping the batch in `run`, which deadlocks |
-| 29 | The empty `catch` on `tail` keeps one rejection from killing the queue, while the caller still sees the error | — |
+| 27 | `run` is not reentrant — the fold is `for (op of ops) await process(op, uow)` | wrapping the batch in `run`, which deadlocks. The suite cannot fail that wrap; it is review of `processAll` |
+| 29 | The empty `catch` on `tail` keeps one rejection from killing the queue, while the caller still sees the error | a rejection that poisons `tail`. The two calls prove that. REQ-18 is the batch on row 27 |
 
 **Gate:** the invariant holds over a random sequence — no note without its receipt, no receipt whose apply is missing.
 

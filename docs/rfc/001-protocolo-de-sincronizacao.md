@@ -151,7 +151,7 @@ The statement does not name a lock, a transaction, or `async`. It names the fact
 - Hand-rolled mutex, no package. `packages/core` has zero dependencies.
 - Predicates run **before** any I/O and **before** the lock. They do not touch the registry.
 - From registry lookup through note write and receipt write: one locked transaction.
-- `query` takes the same lock because the UoW contract is the same on Postgres, where a committed note and an uncommitted receipt can be visible apart. In memory the two `Map.set`s are one synchronous block; a skipped lock cannot see that split. The lock stays so the two adapters do not diverge.
+- `query` takes the same global writer lock. Single process, one writer, no concurrent readers to starve, and the read is trivially consistent. The in-memory read is deliberately stronger than a Postgres `query` at READ COMMITTED: a plain `SELECT` takes no writer lock, readers and writers do not block each other, and the reader sees a snapshot. The core suite cannot produce the read that observes a note at revision N+1 before, or without, the matching receipt. That read is argued when a Postgres `query` exists. The ingredients sit with ADR-005, where the Postgres seams were folded on 2026-10-29.
 
 **Triggers**
 
@@ -182,7 +182,7 @@ function run(fn) {
 }
 ```
 
-The empty `catch` on `tail` keeps a rejection from killing the queue. The caller of `run` still sees the error.
+The empty `catch` on `tail` keeps one thrown callback from killing the queue. The caller of `run` still sees the error. A conflict is a returned `ProcessResult`: `tail` does not reject, and this catch does not run. The batch continues because `process` returns that value (ADR-006).
 
 **`process`, implementer**
 
@@ -213,7 +213,7 @@ Authority: *“Processe a fila na ordem recebida e devolva um resultado por oper
 processAll(ops, uow) → for (op of ops) await process(op, uow)
 ```
 
-Same length, same index. Op *k+1* sees note and registry after *k*. Empty queue → `[]`. Snapshot-at-start of the batch is forbidden: it turns the official `[O1, O2, O3]` into frozen `note_not_found` receipts. Index is the only correlation. `op_id` is payload, not an index: `invalid` carries none, and one batch can return two results with the same `op_id` when a later operation reuses an earlier one (ASM-45).
+A conflict is a returned value. The loop continues, and the catch in §4.3 does not run. Same length, same index. Op *k+1* sees note and registry after *k*. Empty queue → `[]`. Snapshot-at-start of the batch is forbidden: it turns the official `[O1, O2, O3]` into frozen `note_not_found` receipts. Index is the only correlation. `op_id` is payload, not an index: `invalid` carries none, and one batch can return two results with the same `op_id` when a later operation reuses an earlier one (ASM-45).
 
 **Rejected:** stamp every result with a server-assigned `index`. The result becomes self-describing, and it survives a transport that does not preserve array order. A slot number is not the client's `op_id`, so ASM-41 does not forbid it — the statement bars occupying the id, not identifying the slot. Rejected for this core: one in-memory call, no transport between the call and the caller, and the stamp can only ever equal the position it is written on. The type cannot carry the correlation either. `ProcessResult[]` returned for `Operation[]` has no length or order guarantee, and a mapped tuple over a tuple input is machinery out of proportion to the gain. The empty `errors` list is closed by the type. ASM-45 is closed only by the batch test. The packaging clause expires when results cross a boundary that does not guarantee order: a batch split across requests, a queue, or a client that merges responses. A JSON array on one HTTP call still preserves order. The stamp above is then the way out, and the change is a field. ASM-45 points at ADR-005; the review-trigger field is not written here.
 
@@ -244,7 +244,7 @@ Lookup is exact string equality. `query("A")` after a create with `"  A  "` retu
 
 - A distinct result type. Putting a read in the operation table would make `invalid` talk about `op_id` it does not have.
 - No list of notes. No `query(op_id)`. The statement asks for one note, as it is now. Replay of a receipt is a resend of that valid op.
-- `query` takes `uow.run` so a Postgres UoW cannot show a note without its receipt. In memory that window does not exist; the lock stays so the adapters do not diverge.
+- `query` takes `uow.run`, the same lock as `process`. The reason and its limit are in §4.3.
 - **Allowance, not a requirement:** a client may send the next op with `base_revision` equal to the revision on its own `accepted` receipt. That is how the official table runs. The statement’s live base is always `query`. The moment another writer may have landed, `query` is current. An `accepted` revision is only known to be current for the client that just wrote, and only until someone else writes. A `conflict` receipt is not in this allowance — its revision is frozen.
 
 **Resolution is not a verb.** After `conflict`:
@@ -337,6 +337,8 @@ Seven sessions: 0 requirements matrix · 1 this RFC · 2 pure core · 3 envelope
 Session 0 is closed: `docs/reqs.md` carries 22 numbered REQs, and every one of them was walked against a section of this file on 2026-10-28 — none was left without a home. The choices this file makes that the statement does not give are numbered separately in `docs/assumptions.md`.
 
 Cut order if time runs short: the React screen goes first, NestJS stays. The core, the ADRs and the README are never cut.
+
+Cut executed 2026-10-29: the whole envelope went, including NestJS, so the ADRs would exist. Session 3 did not happen. The sentence above is the rule as accepted; the cut broke it on purpose. ADR-005 is the record. The plan of attack's "Nest and Postgres built" is superseded by that cut, not by this section.
 
 ---
 
