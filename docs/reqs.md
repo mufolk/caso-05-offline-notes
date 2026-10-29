@@ -75,7 +75,7 @@ Not requirements — explicit permissions. Each one is quoted so the README and 
 | DEL-02 | Reproducible demonstration. | `demo/demo.ts`, run with `pnpm demo`. Self-verifying: each step declares its expectation and the script throws on any mismatch. |
 | DEL-03 | Up to three highlighted tests, each with the expected result and the kind of bug it helps catch. | `README.md` §5 — the resent conflict, the reused `op_id`, and the invalid payload that does not burn its id. |
 | DEL-04 | Two decisions taken during the work — what I wanted to check, how I investigated, what I concluded. One may be about an AI suggestion. | `README.md` §6 — validation before the registry, against the red-team suggestion; no operation ledger, against the plan. |
-| DEL-05 | How the AI was used and verified. | |
+| DEL-05 | How the AI was used and verified. | `docs/ai-log.md` — four entries: the ahead-base frame, the two review-trigger refusals, the red-team order, the co-author trailers. |
 | DEL-06 | What was left pending. | `README.md` §8 — seven items. The envelope is not built: no Nest, no Postgres, no UI, no model adapter. |
 | DEL-07 | Video, under 30 minutes, with a scenario different from the example, the expected result stated before running, one important test with the code it guards, and where the solution has limits. | |
 

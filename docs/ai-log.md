@@ -1,0 +1,19 @@
+# How the AI was used, and how that was checked
+
+DEL-05. The plan asks for four to six entries, each in three lines: what was suggested, what was kept or changed, how it was checked. Four episodes are on record. No further entry was written to fill the count.
+
+## 1. 2026-10-29, 01:32 — a base ahead of the server
+
+The assistant framed a base ahead of the server as a choice between `invalid` and `conflict`, so that a broken client's text would be kept on purpose. I rejected that frame: the alternative written in RFC-001 §4.2 is a fifth result, and `client_text` is what every conflict stores, not a motive about a client judged broken. I checked that section, ASM-16, and the test `a base ahead of the server's revision is the same conflict`, which sends base 99 against revision 1 and expects `conflict`.
+
+## 2. Two refusals to write the review triggers
+
+Asked twice for the review-trigger text. The fields stayed blank, and the inventory stayed raw material: the status line imported in `2c33b30` says no review-trigger field is written there, and that commit message says both ADR notes remain blank by rule. Checked against the plan's prohibition on the AI writing **Decisão** and **Gatilho de revisão**; the sentences in the files now are the ones dictated on 2026-10-29, in `5563ebc`, on top of the empty structure at `c6475dc`.
+
+## 3. The red-team order, adopted and then reversed
+
+The red-team order, adopted in that sitting, looked up a known `op_id` before the rest of the fields, so a stored id with a field missing came back `id_reutilizado`. Reversed the same night: that order was the reviewer's, and a payload that fails the field check is not an operation, so it does not reuse an id and it does not replay a receipt. Checked against *"Antes de processar, confira os campos da operação. Uma operação inválida não ocupa op_id."*, against the order in RFC-001 §4 (predicates, then registry lookup), and against `process.spec.ts` → *REQ-13 — an invalid payload does not occupy the op_id*.
+
+## 4. The Cursor and Claude trailers, kept
+
+`7843e75` carries `Co-authored-by: Cursor <cursoragent@cursor.com>`. `2c33b30` carries `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>` and a Claude session link. The trailers were not in the message that was passed for those commits; stripping them was on the table, and it was refused, because rewriting the commits would change the hashes a submission names. Checked with `git log`: both trailers are still on those two hashes.

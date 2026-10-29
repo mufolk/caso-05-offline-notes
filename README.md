@@ -150,6 +150,8 @@ sitting on those receipts, keyed by `op_id`; the server will not rebuild the not
 them. That is ADR-002. Putting the ledger in later is a new store, not a backfill of a
 history that was never written.
 
+How those checks were made, and the other times a suggestion was kept or dropped, is `docs/ai-log.md`.
+
 ## 7. Architecture decisions
 
 Eight are filed under `docs/adr/`. ADR-008 and ADR-009 are not filed: on 2026-10-29
@@ -188,4 +190,4 @@ they were folded into ADR-005's Context as seams of an adapter that is not built
 
 ## 9. Video
 
-`TODO (Gui)` — link, under 30 minutes. `pnpm demo` is the new scenario it asks for.
+The recording is still to be made, so this commit carries no URL. It has to stay under 30 minutes. `pnpm demo` is the scenario the statement asks for, separate from the worked example.
