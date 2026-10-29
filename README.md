@@ -2,9 +2,11 @@
 
 **Focus:** back end and architecture. **Case:** 05, "Sincronização de notas offline".
 
-**Time:** `TODO (Gui)` — split it the way the work actually split: the core, with every
-rule of the statement and its tests, versus the optional envelope. Only you have the
-real figure, and a single undifferentiated number reads as a scoping failure.
+**Time:** the in-memory core, the demonstration, and the documents in this repository.
+The plan of attack's split — about 4 hours for the core, plus about 11 hours for an
+optional envelope — counted a Nest API, Postgres, a UI, and a model adapter. None of
+those are in the tree, so that 11 hours is not time this delivery is declaring. There
+is no second figure. §8 is what was not built.
 
 ---
 
@@ -129,14 +131,30 @@ then the same key with a good one, and expects `accepted`.
 
 ## 6. Two decisions I made along the way
 
-`TODO (Gui)` — DEL-04. One of the two may be about an AI suggestion; `docs/ai-log.md` is
-where the raw entries go. What you investigated, how, and what you concluded.
+**A malformed payload is not a reuse of the id.** The red-team pass on RFC-001 pressed
+the other answer: an `op_id` the server has already stored, arriving again with a field
+missing, should come back `id_reused`. I wanted to check which sentence that obeys. The
+statement says to check the fields before processing, and that an invalid operation does
+not occupy `op_id`. A payload that fails the check has not arrived as an operation, so it
+cannot reuse an id and it cannot replay a receipt. I kept validate, then look up. The
+test is `process.spec.ts` → *REQ-13 — an invalid payload does not occupy the op_id*: the
+bad payload, then the same `op_id` with the payload fixed, and the second result is
+`accepted`.
+
+**There is no operation ledger.** The plan of attack said the ledger is the truth and the
+note is a fold of it. I wanted to check whether the statement asked for that. It asks to
+store the content and the result of every valid first arrival. It never asks for the note
+at an earlier revision, or for the order of applies. `query` reads the current note,
+`{id, text, revision}`, and does not read the receipt registry. Accepted texts are still
+sitting on those receipts, keyed by `op_id`; the server will not rebuild the note from
+them. That is ADR-002. Putting the ledger in later is a new store, not a backfill of a
+history that was never written.
 
 ## 7. Architecture decisions
 
 Eight are filed under `docs/adr/`. ADR-008 and ADR-009 are not filed: on 2026-10-29
-they were folded into ADR-005 as seams of an adapter that is not built. **Decision**
-and **Review trigger** are `TODO (Gui)` in every file.
+they were folded into ADR-005's Context as seams of an adapter that is not built.
+**Decision** and **Review trigger** are filled in every file.
 
 | ADR | What it records |
 |---|---|

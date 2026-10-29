@@ -1,6 +1,6 @@
 # Inventory of raw material for the review triggers
 
-**Status:** raw material. No *Review trigger* field is written here, and none was written into the ADR files — each Review trigger section is still `TODO (Gui)`, as is each Decision. ADR-008 and ADR-009 are not filed: folded into ADR-005 as seams on 2026-10-29.
+**Status:** raw material from before the fields were written. Decision and Review trigger now live in `docs/adr/`, filled 2026-10-29. This file is not those fields. ADR-008 and ADR-009 are not filed: folded into ADR-005 as seams on 2026-10-29. One correction in the ADR-001 block: starvation is risk 3 of RFC-001 §7, not risk 4. Risk 4 is the model, ADR-010.
 **Date:** 2026-10-28
 **Source:** RFC-001 §7 (risks), pending items from Session 0, and the conversations of 27 and 28 October.
 **Imported into the repo:** 2026-10-28, from the project workbench. English, content unchanged except where a later decision is noted.
@@ -20,18 +20,18 @@ Checked against the repo in this session. `packages/core/src/memory.ts` is in th
 
 **ADR-003's trigger fact, chosen.** Receipt retention (ASM-43, RFC-001 §7 risk 1). A receipt deleted inside the resend window makes the operation apply twice, which is the decision breaking. Instrument that does not exist: a receipt count, or an age, or a deletion. This delivery keeps every receipt and records none of the three. The `op_id` collision notes stay as the alternative's notes. The `-0` echo stays a consequence: the retry is unaffected, because the fingerprint collapses `-0` and `0`. Neither fact makes stored-receipt idempotency the wrong decision.
 
-**ADR-001's trigger fact stays starvation.** Instrument that does not exist: a count of consecutive `conflict` results on one note before an `accepted`. No attempt threshold is chosen. No way out is chosen. Queue, lease, and assisted merge stay candidates.
+**ADR-001's trigger fact stays starvation.** Instrument that does not exist: a count of consecutive `conflict` results on one note before an `accepted`. No attempt threshold is chosen. The written trigger chooses the short edit lease. A per-note queue and assisted merge are refused there.
 
 **ADR-010's trigger fact stays the accepted-proposal rate.** Instrument that does not exist: proposals offered against proposals that later come back `accepted`. This delivery has no model, no counter, and no flag. The plan's sketch says the flag already exists because the stub is the default. ADR-010's consequences already say the opposite, and the repo agrees with the ADR: there is nothing to turn off. The way out is a flag that would be built with the adapter and would default to the stub. It is not in the tree. No percentage is chosen.
 
-Each block carries the **candidate observable fact**, **what the decision starts to cost** once that fact happens, and the **way out** discussed. The three things the field needs. What is missing is Gui choosing, drafting, and estimating the migration cost.
+Each block carries the **candidate observable fact**, **what the decision starts to cost** once that fact happens, and the **way out** discussed. The three things the field needs. The fields were written into the ADRs on 2026-10-29. This file stays the ingredients.
 
 ---
 
 ## ADR-001 — optimistic concurrency by revision
 
 **Candidate observable fact:** starvation on a contested note. Whoever is resolving a conflict loses the race repeatedly, because every resend arrives already stale.
-Recorded as risk 4 in RFC-001 §7.
+Recorded as risk 3 in RFC-001 §7. Risk 4 in that section is the model, ADR-010. An earlier line of this inventory had the two numbers swapped.
 
 **What it starts to cost:** the user who worked the most is the one who loses the most work. The friction stops being "resolve a conflict" and becomes "never manage to save".
 
@@ -65,7 +65,13 @@ Already has its own file: `docs/claude/adr-003-op-id-collision-notes.md` (`op_id
 
 **What it starts to cost:** the moment that field is echoed, a normalized row and a preserving row disagree, and a client that sent `-0` can be shown `0`. The retry is unaffected, because the fingerprint collapses the two either way. The lie is only in the echo.
 
-**Way out discussed:** decide at the write, before any client has been shown the number. The row keeps the bits and the new field echoes them, or the predicate normalizes `-0` to `0` on the way in so the row and the fingerprint cannot diverge. The migration is that one policy. The *Review trigger* field stays unwritten; this block is the ingredients.
+**Way out discussed:** decide at the write, before any client has been shown the number. The row keeps the bits and the new field echoes them, or the predicate normalizes `-0` to `0` on the way in so the row and the fingerprint cannot diverge. The migration is that one policy. This block is not the Review trigger. That field is receipt retention. The `-0` echo stays a consequence.
+
+---
+
+## ADR-004 — the receipt is immutable; query is a separate path
+
+No inventory block existed for this one. The fact in the Review trigger — a client required to learn the live note from a resend, because it has no `query` — was written with the field on 2026-10-29. The official pair it cites, the resent conflict still at revision 2 and `query` at 3, is the statement's own example.
 
 ---
 
@@ -83,7 +89,7 @@ Already has its own file: `docs/claude/adr-003-op-id-collision-notes.md` (`op_id
 
 **What it starts to cost:** position stops being a key the caller can trust. `invalid` carries no `op_id`, and one batch can return two results with the same `op_id`, so neither failure has a key left once order is gone.
 
-**Way out discussed:** the server-stamped `index` already written in full in RFC-001 §4.4, on every member including `invalid`. The migration is adding that field. It is not a redesign. The migration-cost estimate is still Gui's, as is the *Review trigger* field itself — this block is the ingredients, not the field.
+**Way out discussed:** the server-stamped `index` already written in full in RFC-001 §4.4, on every member including `invalid`. The migration is adding that field. It is not a redesign. This block is not ADR-005's Review trigger. That trigger is the duplicated rule, and it is written in the ADR. The stamp stays an ingredient.
 
 **Pointer.** ASM-45 cites ADR-005. The scope question does not move that pointer. ASM-21, ASM-22, ASM-26 and ASM-28 point at ADR-005 as of 2026-10-29.
 
@@ -101,7 +107,7 @@ Already has its own file: `docs/claude/adr-003-op-id-collision-notes.md` (`op_id
 
 **What it starts to cost:** read-skew against the real adapter is invisible to every green core run. A reviewer who treats the suite as proof that `query` and the receipt move together is reading a stronger adapter than the one that ships.
 
-**Way out discussed:** argue the read when the Postgres `query` is written. The in-memory lock stays as it is; the argument belongs to the adapter. No snapshot shape is chosen here. The *Review trigger* field stays unwritten; this block is the ingredients.
+**Way out discussed:** argue the read when the Postgres `query` is written. The in-memory lock stays as it is; the argument belongs to the adapter. No snapshot shape is chosen here. This block is not ADR-005's Review trigger. That trigger is the duplicated rule. The READ COMMITTED seam stays an ingredient until an adapter is written.
 
 **Third observable fact (ASM-25, ASM-28).** Registry lookup on the in-memory unit of work becomes `async`. Today the callback passed to `run` does not suspend: `receipts.get`, `notes.set` and `receipts.set` are synchronous `Map` calls, so "no `await` after the first write" is true by inspection, and no execution produces a half-written pair. That is the construction ASM-28's `—` rests on. The atomicity called free in the fact above is this construction, and it is free only while that body does not suspend. An `async` lookup is a suspension inside the locked region. Exclusion still holds: `tail` is held across the whole callback, so nothing interleaves. Keeping that suspension before the writes, rather than between the two `Map.set`s, stops being structural and becomes a rule someone has to not break. "Unreachable" becomes "unreachable as currently written."
 
@@ -109,7 +115,7 @@ One event, two rows, the same shape as ADR-003's third fact touching ASM-13. ASM
 
 **What it starts to cost:** the `—` no longer means a half-written pair cannot happen. An `await` between the two writes is then a possible edit, the suite stays green, and the only thing still keeping the pair together in memory is review of the body. The adapter that needs all-or-nothing is the Postgres one, which has `ROLLBACK`.
 
-**Way out discussed:** take the trade on purpose. The seam lands so one `process` serves a Postgres unit of work (ASM-21). ASM-25's overlap call becomes a real debt and gets paid. ASM-28's `—` moves onto `ROLLBACK` in that adapter, and the in-memory body keeps "compute the receipt, then write" as review. The *Review trigger* field stays unwritten; this block is the ingredients. The pointer is ADR-005 until an adapter exists and these seams split back out.
+**Way out discussed:** take the trade on purpose. The seam lands so one `process` serves a Postgres unit of work (ASM-21). ASM-25's overlap call becomes a real debt and gets paid. ASM-28's `—` moves onto `ROLLBACK` in that adapter, and the in-memory body keeps "compute the receipt, then write" as review. This block is not ADR-005's Review trigger. That trigger is the duplicated rule. The pointer is ADR-005 until an adapter exists and these seams split back out.
 
 ---
 

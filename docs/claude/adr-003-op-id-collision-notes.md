@@ -1,6 +1,6 @@
 # Notes for the review trigger of ADR-003
 
-**Status:** raw material. The *Review trigger* field is still blank, for Gui to write.
+**Status:** raw material for the collision alternative. The Review trigger in ADR-003 is receipt retention, not this note.
 **ADR:** 003 — idempotency by stored receipt plus payload fingerprint.
 Not 010. What is at stake here is the idempotency key, not the LLM.
 **Conversation date:** 2026-10-28

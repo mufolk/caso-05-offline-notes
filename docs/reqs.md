@@ -71,12 +71,12 @@ Not requirements — explicit permissions. Each one is quoted so the README and 
 
 | ID | Deliverable | Where |
 |---|---|---|
-| DEL-01 | README with case, focus, time, and instructions to install, run and test. | `README.md` §1 (run) and §3 (layout). Time figure still blank — only Gui has it. |
+| DEL-01 | README with case, focus, time, and instructions to install, run and test. | `README.md` header and §1. The plan's ~4h + ~11h is not the figure: the envelope those 11 hours named is not in the tree. |
 | DEL-02 | Reproducible demonstration. | `demo/demo.ts`, run with `pnpm demo`. Self-verifying: each step declares its expectation and the script throws on any mismatch. |
 | DEL-03 | Up to three highlighted tests, each with the expected result and the kind of bug it helps catch. | `README.md` §5 — the resent conflict, the reused `op_id`, and the invalid payload that does not burn its id. |
-| DEL-04 | Two decisions taken during the work — what I wanted to check, how I investigated, what I concluded. One may be about an AI suggestion. | |
+| DEL-04 | Two decisions taken during the work — what I wanted to check, how I investigated, what I concluded. One may be about an AI suggestion. | `README.md` §6 — validation before the registry, against the red-team suggestion; no operation ledger, against the plan. |
 | DEL-05 | How the AI was used and verified. | |
-| DEL-06 | What was left pending. | `README.md` §8 — seven items, each with what it would cost in production. Needs one more pass once the envelope's fate is settled. |
+| DEL-06 | What was left pending. | `README.md` §8 — seven items. The envelope is not built: no Nest, no Postgres, no UI, no model adapter. |
 | DEL-07 | Video, under 30 minutes, with a scenario different from the example, the expected result stated before running, one important test with the code it guards, and where the solution has limits. | |
 
 **Submission items, not numbered above:** repository link plus the full commit hash to be evaluated; video link (may also live in the README); case number, chosen focus and approximate time; fictional data only, no credentials, no employer code.
