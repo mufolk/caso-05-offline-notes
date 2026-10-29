@@ -1,0 +1,15 @@
+{
+  "name": "challenge",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.6.5",
+  "scripts": {
+    "test:core": "vitest run",
+    "check:core": "tsc -p packages/core --noEmit",
+    "check:contracts": "tsc -p packages/contracts --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "vitest": "^5.0.5"
+  }
+}

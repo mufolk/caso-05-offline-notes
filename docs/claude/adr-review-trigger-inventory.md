@@ -42,6 +42,12 @@ Already has its own file: `docs/claude/adr-003-op-id-collision-notes.md` (`op_id
 
 **Ways out discussed:** none. The retention window still has to be decided, along with what happens to a resend that falls outside it.
 
+**Third observable fact, not yet noted there:** a receipt or a query starts returning `base_revision`. Numbered against ASM-13. Today `accepted` carries no `base_revision`, and `===` treats `-0` as `0`, so a write that normalized `-0` to `0` is invisible. The three calls in ASM-13's Proof cell still pass. "The receipt row keeps the number as sent" protects a seam that does not exist. `check` returning `Object.is(base_revision, -0)` is the predicate's return value, and it is already proved; it says nothing about the row.
+
+**What it starts to cost:** the moment that field is echoed, a normalized row and a preserving row disagree, and a client that sent `-0` can be shown `0`. The retry is unaffected, because the fingerprint collapses the two either way. The lie is only in the echo.
+
+**Way out discussed:** decide at the write, before any client has been shown the number. The row keeps the bits and the new field echoes them, or the predicate normalizes `-0` to `0` on the way in so the row and the fingerprint cannot diverge. The migration is that one policy. The *Review trigger* field stays unwritten; this block is the ingredients.
+
 ---
 
 ## ADR-005 — the boundary between core and envelope
@@ -53,6 +59,14 @@ Already has its own file: `docs/claude/adr-003-op-id-collision-notes.md` (`op_id
 **What it starts to cost:** the promise of "zero dependencies in the core" still stands, but the boundary gains a point of duplication that has to be kept in sync.
 
 **Way out discussed:** none.
+
+**Second candidate observable fact (ASM-45, the rejected `index` stamp).** Results cross a boundary that does not guarantee order. "One in-memory call, nothing between the call and the caller" is a property of the core's current packaging, not of the protocol. A JSON array preserves order, so a single HTTP call still holds. What breaks the correlation is a batch split across requests, a queue, or any client that merges responses.
+
+**What it starts to cost:** position stops being a key the caller can trust. `invalid` carries no `op_id`, and one batch can return two results with the same `op_id`, so neither failure has a key left once order is gone.
+
+**Way out discussed:** the server-stamped `index` already written in full in RFC-001 §4.4, on every member including `invalid`. The migration is adding that field. It is not a redesign. The migration-cost estimate is still Gui's, as is the *Review trigger* field itself — this block is the ingredients, not the field.
+
+**Pointer, already placed.** ASM-45 in `docs/assumptions.md` cites ADR-005. The divergence above does not hold that pointer: Nest and Postgres built, or seams only, the fact still lives on this seam. ASM-21, ASM-22 and ASM-28 remain without a pointer until ADR-008 / ADR-009 is settled.
 
 ---
 

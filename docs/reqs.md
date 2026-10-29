@@ -13,7 +13,7 @@
 | ID | Requirement | Statement (verbatim) | Proof |
 |---|---|---|---|
 | REQ-01 | No notes on the server at the start. | "Comece sem notas no servidor." | |
-| REQ-02 | Every client operation has `op_id`, `note_id`, `base_revision` and text. | "Uma alteração enviada pelo cliente tem op_id, note_id, base_revision e texto." | |
+| REQ-02 | Every client operation has `op_id`, `note_id`, `base_revision` and text. | "Uma alteração enviada pelo cliente tem op_id, note_id, base_revision e texto." | accepts the official operation and stores each field as sent |
 | REQ-03 | A note is created at revision 1 when the client sends base revision 0. | "Uma nota é criada na revisão 1 quando o cliente envia a revisão base 0." | |
 | REQ-04 | An existing note is only changed if the base revision equals the current revision number. | "Para alterar uma nota existente, a revisão base deve ser igual à revisão atual no servidor." | |
 | REQ-05 | If accepted, replace the text and add 1 to the revision number. | "Se for aceita, a alteração troca o texto e aumenta a revisão em 1…" | |
@@ -23,7 +23,7 @@
 | REQ-09 | An operation with base greater than zero for a non-existent note returns `note_not_found`. | "…ou indique que a nota ainda não existe." | |
 | REQ-10 | Do not merge texts automatically. | "Não junte os textos automaticamente…" | |
 | REQ-11 | Do not use the device clock to pick a winner. | "…nem use o relógio do dispositivo para escolher um vencedor." | |
-| REQ-12 | Before processing, check the operation's fields. | "Antes de processar, confira os campos da operação." | |
+| REQ-12 | Before processing, check the operation's fields. | "Antes de processar, confira os campos da operação." | names each missing or illegal field, with extra_keys in front |
 | REQ-13 | An invalid operation does not take up an `op_id`. | "Uma operação inválida não ocupa op_id." | |
 | REQ-14 | For every valid operation received for the first time, store its content and result, even if it was a conflict. | "Para cada operação válida recebida pela primeira vez, guarde seu conteúdo e resultado, mesmo que tenha dado conflito." | |
 | REQ-15 | If the same `op_id` arrives again with the same content, return the original result without applying the change again. | "Se o mesmo op_id chegar de novo com o mesmo conteúdo, devolva o resultado original sem aplicar a alteração outra vez." | |

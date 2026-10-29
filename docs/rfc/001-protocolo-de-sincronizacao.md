@@ -213,7 +213,9 @@ Authority: *“Processe a fila na ordem recebida e devolva um resultado por oper
 processAll(ops, uow) → for (op of ops) await process(op, uow)
 ```
 
-Same length, same index. Op *k+1* sees note and registry after *k*. Empty queue → `[]`. Snapshot-at-start of the batch is forbidden: it turns the official `[O1, O2, O3]` into frozen `note_not_found` receipts.
+Same length, same index. Op *k+1* sees note and registry after *k*. Empty queue → `[]`. Snapshot-at-start of the batch is forbidden: it turns the official `[O1, O2, O3]` into frozen `note_not_found` receipts. Index is the only correlation. `op_id` is payload, not an index: `invalid` carries none, and one batch can return two results with the same `op_id` when a later operation reuses an earlier one (ASM-45).
+
+**Rejected:** stamp every result with a server-assigned `index`. The result becomes self-describing, and it survives a transport that does not preserve array order. A slot number is not the client's `op_id`, so ASM-41 does not forbid it — the statement bars occupying the id, not identifying the slot. Rejected for this core: one in-memory call, no transport between the call and the caller, and the stamp can only ever equal the position it is written on. The type cannot carry the correlation either. `ProcessResult[]` returned for `Operation[]` has no length or order guarantee, and a mapped tuple over a tuple input is machinery out of proportion to the gain. The empty `errors` list is closed by the type. ASM-45 is closed only by the batch test. The packaging clause expires when results cross a boundary that does not guarantee order: a batch split across requests, a queue, or a client that merges responses. A JSON array on one HTTP call still preserves order. The stamp above is then the way out, and the change is a field. ASM-45 points at ADR-005; the review-trigger field is not written here.
 
 ### 4.5 Query
 
