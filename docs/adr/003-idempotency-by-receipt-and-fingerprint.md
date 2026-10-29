@@ -6,9 +6,11 @@
 
 The same `op_id` with the same content returns the original receipt and does not apply again. The same `op_id` with different content returns `id_reused`. The statement never defines "content", and it never says what `id_reutilizado` carries besides the error. The core's content is `{note_id, base_revision, text}`, compared with `===` on each field. `op_id` is the key, not part of the fingerprint. `id_reused` returns `{type, op_id}` and does not write.
 
+Ordering does not get its own sentence. Validate, then look up, then compare, then commit is the machine in `process`, already fixed by RFC-001 §4. "Register, then compare" would also be the wrong order if register means the write: the write is last, and only on a first arrival. The ordering is not this trade-off. This trade-off is what is hashed and what a mismatch is allowed to reveal.
+
 ## Decision
 
-TODO (Gui)
+The fingerprint is `note_id`, `base_revision`, and `text`, compared with `===` on each field, with `op_id` only as the lookup key; a fingerprint that does not match returns `{type: "id_reused", op_id}` and nothing else — the result code and the key, never the stored receipt.
 
 ## Alternatives considered
 
@@ -24,4 +26,4 @@ Bad. The honest client that reused its own id gets a bare code and no hint which
 
 ## Review trigger
 
-TODO (Gui)
+Revisit when a receipt is deleted or aged out while its client can still resend. The break is observable: the resend applies a second time, because a missing row is a first arrival and cannot be told from an `op_id` that was never seen. This delivery keeps every receipt and records no count, no age, and no deletion, so the instrument is not in the tree. No window is chosen. A resend that arrives outside the window must not apply and must not be handed a reconstructed body. The exit is a tombstone that keeps the `op_id` reserved and returns a bare expired result. The original receipt is then gone, which is the same price as ADR-002, taken on purpose. Migration is that row plus one branch on lookup. The body can go; the key cannot, unless you accept the double apply. Per-client scoping of `op_id` is a different problem and is not this trigger.

@@ -1,14 +1,16 @@
 # ADR-010 — A model may propose an operation; it does not write the note
 
-**Status:** Accepted as a constraint; no adapter is built · **Date:** 2026-10-29 · **Context:** RFC-001 §7, risk 4
+**Status:** Accepted as a constraint; the adapter is not built · **Date:** 2026-10-29 · **Context:** RFC-001 §7, risk 4
 
 ## Context
 
 A conflict leaves two texts, and the obvious help is to merge them. The statement forbids automatic merge. The room left for a model is narrow: it drafts a text, that draft becomes an ordinary operation with a new `op_id` and `base_revision` equal to the current revision, and the draft walks the same four steps as a human edit. If the note moved while the model was thinking, the proposal conflicts and is stored as a conflict. No package in this repo calls a model. README §8 records that absence.
 
+`process` has no branch for a model. A fresh `op_id` on the live revision is accepted the way any other edit is.
+
 ## Decision
 
-TODO (Gui)
+With no adapter in the tree this is a designed contract, not a built behaviour: a proposal is an ordinary operation — a new `op_id`, `base_revision` equal to the current revision, the same four steps as a human edit — and that is what makes it indistinguishable from a person.
 
 ## Alternatives considered
 
@@ -24,4 +26,4 @@ Bad. There is no adapter, no flag, and no count of how often a proposal would be
 
 ## Review trigger
 
-TODO (Gui)
+Count proposals offered against proposals whose operation later comes back `accepted`. The counter would live next to the model adapter, not in `process`, which has no way to see a proposal. The field says outright that this trigger is not observable in this delivery: there is no model, no counter, and no flag, and no percentage is chosen. The exit is a flag built with that adapter, defaulting to the stub, so turning proposals off does not touch `process`. There is nothing in the tree to flip. Migration arrives with the adapter and is the flag plus the counter, not a protocol change.

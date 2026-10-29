@@ -6,9 +6,11 @@
 
 The statement wants one result per operation, in the order received, and an error or a conflict must not stop the rest of the queue. `process` returns a `ProcessResult`. `processAll` folds the queue and returns an array of the same length. A conflict takes the normal path. The empty `catch` on the in-memory lock covers a throw; after the predicates, that throw is a bug in `process`, not an outcome the statement names (ASM-29).
 
+A bug in `process` may still throw, and the empty `catch` on the in-memory lock exists for that throw. There is no HTTP adapter here to turn values back into status codes, so the sentence does not speak for one.
+
 ## Decision
 
-TODO (Gui)
+The core never throws a domain outcome; `process` and `processAll` return a `ProcessResult`, and the claim covers the core's results, not the repo.
 
 ## Alternatives considered
 
@@ -24,4 +26,4 @@ Bad. Every call is a switch. A throw is outside that promise: the "one result pe
 
 ## Review trigger
 
-TODO (Gui)
+Revisit when a domain outcome — `conflict`, `invalid`, `note_not_found`, or `id_reused` — arrives as a rejection of `uow.run`, so the queue continues only because the fold or the empty `catch` swallowed it. You are then paying for the switch and still paying for the catch the values were adopted to avoid. An HTTP adapter that maps a returned value onto a status code is not this fact: the core would still have returned a value. The exit, and only if the product has dropped the rule that an error must not stop the rest of the queue, is to throw and to catch in `processAll` alone. Migration is that one catch and taking the domain tags off the return path, about a day, and it is a reversal of this decision. This delivery throws no domain tag, and nothing records a rejection by tag.

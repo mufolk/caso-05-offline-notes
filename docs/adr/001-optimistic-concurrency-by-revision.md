@@ -8,7 +8,7 @@ Disconnected clients edit the same note and submit later, duplicated and out of 
 
 ## Decision
 
-TODO (Gui)
+The server accepts an operation on an existing note only when its `base_revision` equals that note's revision; otherwise it stores a `conflict`, leaves the note as it is, and lets the sender of a later operation choose the text.
 
 ## Alternatives considered
 
@@ -26,4 +26,4 @@ Bad. The person who edited offline the longest is the one who resolves. On a bus
 
 ## Review trigger
 
-TODO (Gui)
+Revisit when one note shows a run of consecutive `conflict` results before an `accepted`, and resolving has turned into failing to save. The count is that run length. This delivery gives you nothing to count it with: there is no counter, and there is no client identity, so a pile of conflict receipts on one note is not yet one starving resolver. No threshold is set. The exit is a short edit lease, a server-side record beside the note, held from the resolving read until the next op, so other writers do not advance the revision while it is held. A per-note queue that applied the stale text would be last-write-wins or a merge, both already refused. Assisted merge does not exit this failure: a stale proposal conflicts like any other operation, and that feature is ADR-010. Migration is the lease record plus that check, about a day in an adapter, once an adapter exists. The result codes stay. The note still has no clock field; the lease is not one.

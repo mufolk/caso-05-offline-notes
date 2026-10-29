@@ -10,7 +10,7 @@ The plan's ADR-008 and ADR-009 are folded into this file as seams, decided 2026-
 
 ## Decision
 
-TODO (Gui)
+The core may not know a framework, a database, a validator, or a model client, and a reviewer checks that by opening `packages/core/package.json`, whose only dependency is `contracts`.
 
 ## Alternatives considered
 
@@ -26,4 +26,4 @@ Bad. "Zero runtime dependencies" survives opening the file. "Zero entries under 
 
 ## Review trigger
 
-TODO (Gui)
+Revisit at the first insert a persisted constraint accepts and `check` in `predicates.ts` would reject. The instrument is a schema and that insert. This delivery has neither, so the disagreement cannot be observed here. The exit is one source: the predicate stays the rule, and the constraint is generated from the closed key set or it is not shipped. Migration is hours to regenerate on an empty store, and a backfill if a violating row has already landed. Caught at the first disagreement, it stays hours. The atomicity seam and the READ COMMITTED seam are not this trigger.

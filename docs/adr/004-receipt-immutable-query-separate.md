@@ -8,7 +8,7 @@ The statement says the result of a resend may contain stale data, because it is 
 
 ## Decision
 
-TODO (Gui)
+On a resend the server returns the stored receipt unchanged and refuses to refresh it; the helpful rewrite, or a resend answered with the live note, is the reflex this decision rejects, and the live note is only `query`, on its own result type.
 
 ## Alternatives considered
 
@@ -24,4 +24,4 @@ Bad. A client that renders the receipt and never calls `query` shows stale text 
 
 ## Review trigger
 
-TODO (Gui)
+Revisit when a client is required to learn the live note from a resend, because it has no `query`. Staleness is then a wrong answer, where today it is the rule the official pair demonstrates: the resent conflict still at revision 2, `query` at 3. Nothing in this delivery counts callers that skip `query`. The exit is to return the live note beside the frozen receipt and leave the stored row alone. Rewriting the row on read would destroy the original result the resend exists to repeat. Migration is that extra read and a field on the response, and steps 7 and 8 of the official example stop being the contract.
