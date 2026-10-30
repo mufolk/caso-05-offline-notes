@@ -1,6 +1,6 @@
 # How the AI was used, and how that was checked
 
-DEL-05. The plan asks for four to six entries, each in three lines: what was suggested, what was kept or changed, how it was checked. Four episodes are on record. No further entry was written to fill the count.
+DEL-05. The plan asks for four to six entries, each in three lines: what was suggested, what was kept or changed, how it was checked. Five episodes are on record.
 
 ## 1. 2026-10-29, 01:32 — a base ahead of the server
 
@@ -17,3 +17,7 @@ The red-team order, adopted in that sitting, looked up a known `op_id` before th
 ## 4. The Cursor and Claude trailers, kept
 
 `7843e75` carries `Co-authored-by: Cursor <cursoragent@cursor.com>`. `2c33b30` carries `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>` and a Claude session link. The trailers were not in the message that was passed for those commits; stripping them was on the table, and it was refused, because rewriting the commits would change the hashes a submission names. Checked with `git log`: both trailers are still on those two hashes.
+
+## 5. 2026-10-29 — the adversarial pass called every row met
+
+The pass had the statement, the code, and the matrix, and returned twenty-two met with an empty "não verificável" column. For REQ-10 it cited `text: op.text` with no concatenation; for REQ-11 it cited that no source file reads a clock. I did not keep that as proof. The README already called both rows absences, and a verdict that reads the implementation and calls the reading evidence is green and wrong. REQ-10 is now the test that fails if the texts are joined. REQ-11 stays declared: stubbing the clock on one path does not show it is never read.

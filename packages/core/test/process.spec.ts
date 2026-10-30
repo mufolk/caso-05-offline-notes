@@ -106,6 +106,30 @@ describe("process — the revision table (RFC-001 §4.2)", () => {
     });
   });
 
+  it("REQ-10 — an accepted note's text is the operation's text, and a conflict returns each input unjoined", async () => {
+    const sent = "edição A";
+    const proposal = "edição B";
+
+    const accepted = await process(op({ text: sent }), uow);
+    expect(accepted.type).toBe("accepted");
+    if (accepted.type === "accepted") expect(accepted.text === sent).toBe(true);
+
+    const found = await query("N", uow);
+    expect(found.type).toBe("found");
+    if (found.type === "found") expect(found.text === sent).toBe(true);
+
+    // "Não junte os textos automaticamente." A join is a third string.
+    const conflict = await process(
+      op({ op_id: "B", base_revision: 0, text: proposal }),
+      uow,
+    );
+    expect(conflict.type).toBe("conflict");
+    if (conflict.type === "conflict") {
+      expect(conflict.server_text === sent).toBe(true);
+      expect(conflict.client_text === proposal).toBe(true);
+    }
+  });
+
   it("base 0 on a live note is a conflict, not a reset", async () => {
     await process(op({ text: "vivo" }), uow);
     await process(op({ op_id: "B", base_revision: 1, text: "vivo 2" }), uow);

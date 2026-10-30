@@ -17,7 +17,7 @@ step) and pnpm.
 
 ```bash
 pnpm i
-pnpm test:core   # the whole challenge: 55 tests, 7 files
+pnpm test:core   # the whole challenge: 56 tests, 7 files
 pnpm demo        # the reproducible demonstration, below
 ```
 
@@ -71,7 +71,7 @@ after the idempotency lookup would let a malformed payload burn an `op_id` forev
 
 Every sentence of the statement carrying an obligation is numbered in `docs/reqs.md`
 with its verbatim Portuguese quote. This table is that file's REQ ↔ test mapping,
-without the quotes. Two rows are absences rather than behaviour, and say so.
+without the quotes. One row is an absence rather than behaviour, and says why it is declared instead of tested.
 
 | ID | Requirement | Proof |
 |---|---|---|
@@ -84,8 +84,8 @@ without the quotes. Two rows are absences rather than behaviour, and say so.
 | REQ-07 | A conflict returns the server's current data. | `process` → conflict preserves the server text and the client proposal |
 | REQ-08 | Preserve the server's text and the client's proposal in the operation result. | `process` → conflict preserves the server text and the client proposal |
 | REQ-09 | An operation with base greater than zero for a non-existent note returns `note_not_found`. | `process` → note_not_found carries the client's text and no server fields |
-| REQ-10 | Do not merge texts automatically. | *absence* — There is no merge path to test: the only write is "replace the text" (REQ-05), and `conflict` returns the two texts side by side, unjoined (REQ-08) |
-| REQ-11 | Do not use the device clock to pick a winner. | *absence* — The note is exactly `{id, text, revision}` (ASM-04) and no result type carries a timestamp, so there is no clock to resolve by |
+| REQ-10 | Do not merge texts automatically. | `process` → an accepted note's text is the operation's text, and a conflict returns each input unjoined |
+| REQ-11 | Do not use the device clock to pick a winner. | *absence, declared rather than tested* — stubbing the clock and seeing the same result shows it was not read on that path, not that it is never read. The note is `{id, text, revision}` (ASM-04), and no result carries a timestamp |
 | REQ-12 | Before processing, check the operation's fields. | `predicates` → names each missing or illegal field, with extra_keys in front |
 | REQ-13 | An invalid operation does not take up an `op_id`. | `process` → an invalid payload does not occupy the op_id |
 | REQ-14 | For every valid operation received for the first time, store its content and result, even if it was a conflict. | `process` → a conflict is stored and resending it returns the frozen pair |
@@ -95,7 +95,7 @@ without the quotes. Two rows are absences rather than behaviour, and say so.
 | REQ-18 | An error or conflict does not block the following operations. | `queue` → a conflict in the middle does not block the rest |
 | REQ-19 | The result of a resend may contain stale data: it is the receipt of the original operation. | `exemplo-do-statement` → resend of O3 still shows the original conflict, at revision 2 |
 | REQ-20 | A separate query must show the note as it is now. | `exemplo-do-statement` → a query shows revision 3 |
-| REQ-21 | To resolve a conflict, allow sending another operation with a new `op_id`, the chosen text and the current base revision. | `exemplo-do-statement` → resolving O3's conflict from the frozen revision conflicts again |
+| REQ-21 | To resolve a conflict, allow sending another operation with a new `op_id`, the chosen text and the current base revision. | `exemplo-do-statement` → EX-05 — O4, base 2, 'A + B': updates N to revision 3 |
 | REQ-22 | Each note has an id, a text and a revision number. | `query` → found shows the note as it is now, with its three fields |
 
 The statement's own example runs as its own spec, step by step, named after the lines of

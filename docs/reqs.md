@@ -21,8 +21,8 @@
 | REQ-07 | A conflict returns the server's current data. | "Quando a revisão base não corresponder à esperada, retorne conflito e os dados atuais do servidor…" | REQ-07, REQ-08 — conflict preserves the server text and the client proposal |
 | REQ-08 | Preserve the server's text and the client's proposal in the operation result. | "Preserve o texto do servidor e a proposta do cliente no resultado dessa operação." | REQ-07, REQ-08 — conflict preserves the server text and the client proposal |
 | REQ-09 | An operation with base greater than zero for a non-existent note returns `note_not_found`. | "…ou indique que a nota ainda não existe." | REQ-09 — note_not_found carries the client's text and no server fields |
-| REQ-10 | Do not merge texts automatically. | "Não junte os textos automaticamente…" | — absence, not behaviour. There is no merge path to test: the only write is "replace the text" (REQ-05), and `conflict` returns the two texts side by side, unjoined (REQ-08) |
-| REQ-11 | Do not use the device clock to pick a winner. | "…nem use o relógio do dispositivo para escolher um vencedor." | — absence, not behaviour. The note is exactly `{id, text, revision}` (ASM-04) and no result type carries a timestamp, so there is no clock to resolve by |
+| REQ-10 | Do not merge texts automatically. | "Não junte os textos automaticamente…" | REQ-10 — an accepted note's text is the operation's text, and a conflict returns each input unjoined |
+| REQ-11 | Do not use the device clock to pick a winner. | "…nem use o relógio do dispositivo para escolher um vencedor." | — absence, declared rather than tested. Stubbing `Date.now` to two absurd values and getting the same result shows the clock was not read on that path, not that it is never read. The note is exactly `{id, text, revision}` (ASM-04) and no result type carries a timestamp |
 | REQ-12 | Before processing, check the operation's fields. | "Antes de processar, confira os campos da operação." | names each missing or illegal field, with extra_keys in front |
 | REQ-13 | An invalid operation does not take up an `op_id`. | "Uma operação inválida não ocupa op_id." | REQ-13 — an invalid payload does not occupy the op_id |
 | REQ-14 | For every valid operation received for the first time, store its content and result, even if it was a conflict. | "Para cada operação válida recebida pela primeira vez, guarde seu conteúdo e resultado, mesmo que tenha dado conflito." | REQ-14 — a conflict is stored and resending it returns the frozen pair |
@@ -32,7 +32,7 @@
 | REQ-18 | An error or conflict does not block the following operations. | "Um erro ou conflito não impede as próximas." | REQ-17, REQ-18 — a conflict in the middle does not block the rest |
 | REQ-19 | The result of a resend may contain stale data: it is the receipt of the original operation. | "O resultado de um reenvio pode conter dados antigos: ele é o recibo da operação original." | EX-06 — resend of O3 still shows the original conflict, at revision 2 |
 | REQ-20 | A separate query must show the note as it is now. | "Uma consulta separada deve mostrar a nota como está agora." | EX-07 — a query shows revision 3 |
-| REQ-21 | To resolve a conflict, allow sending another operation with a new `op_id`, the chosen text and the current base revision. | "Para resolver um conflito, permita enviar outra operação, com novo op_id, o texto escolhido e a revisão base atual." | resolving O3's conflict from the frozen revision conflicts again |
+| REQ-21 | To resolve a conflict, allow sending another operation with a new `op_id`, the chosen text and the current base revision. | "Para resolver um conflito, permita enviar outra operação, com novo op_id, o texto escolhido e a revisão base atual." | EX-05 — O4, base 2, 'A + B': updates N to revision 3 |
 | REQ-22 | Each note has an id, a text and a revision number. | "Cada nota tem id, texto e um número de revisão." | REQ-20, REQ-22 — found shows the note as it is now, with its three fields |
 
 ---
@@ -75,7 +75,7 @@ Not requirements — explicit permissions. Each one is quoted so the README and 
 | DEL-02 | Reproducible demonstration. | `demo/demo.ts`, run with `pnpm demo`. Self-verifying: each step declares its expectation and the script throws on any mismatch. |
 | DEL-03 | Up to three highlighted tests, each with the expected result and the kind of bug it helps catch. | `README.md` §5 — the resent conflict, the reused `op_id`, and the invalid payload that does not burn its id. |
 | DEL-04 | Two decisions taken during the work — what I wanted to check, how I investigated, what I concluded. One may be about an AI suggestion. | `README.md` §6 — validation before the registry, against the red-team suggestion; no operation ledger, against the plan. |
-| DEL-05 | How the AI was used and verified. | `docs/ai-log.md` — four entries: the ahead-base frame, the two review-trigger refusals, the red-team order, the co-author trailers. |
+| DEL-05 | How the AI was used and verified. | `docs/ai-log.md` — five entries: the ahead-base frame, the two review-trigger refusals, the red-team order, the co-author trailers, the adversarial pass that called every row met. |
 | DEL-06 | What was left pending. | `README.md` §8 — seven items. The envelope is not built: no Nest, no Postgres, no UI, no model adapter. |
 | DEL-07 | Video, under 30 minutes, with a scenario different from the example, the expected result stated before running, one important test with the code it guards, and where the solution has limits. | |
 
