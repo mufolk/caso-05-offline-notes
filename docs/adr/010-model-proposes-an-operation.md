@@ -1,6 +1,6 @@
 # ADR-010 — A model may propose an operation; it does not write the note
 
-**Status:** Accepted as a constraint; the adapter is not built · **Date:** 2026-10-29 · **Context:** RFC-001 §7, risk 4
+**Status:** Accepted as a constraint; the adapter is not built · **Date:** 2026-10-29 · **Review trigger revised:** 2026-10-30 · **Context:** RFC-001 §7, risk 4
 
 ## Context
 
@@ -26,4 +26,4 @@ Bad. There is no adapter, no flag, and no count of how often a proposal would be
 
 ## Review trigger
 
-Count proposals offered against proposals whose operation later comes back `accepted`. The counter would live next to the model adapter, not in `process`, which has no way to see a proposal. The field says outright that this trigger is not observable in this delivery: there is no model, no counter, and no flag, and no percentage is chosen. The exit is a flag built with that adapter, defaulting to the stub, so turning proposals off does not touch `process`. There is nothing in the tree to flip. Migration arrives with the adapter and is the flag plus the counter, not a protocol change.
+When proposals are offered and fewer of them come back `accepted` than are refused, this decision is wrong: the feature costs more confusion than convenience, and a hurried user can still accept a sentence the model dropped or invented (RFC-001 §7, risk 4). The exit is a flag built with the adapter, defaulting to the stub, so turning proposals off does not touch `process`. Migration is that flag plus the counter of proposals offered against proposals later `accepted`, paid when the adapter is built, and it is not a protocol change. The counter lives next to the adapter. `process` has no way to see a proposal. The flag is not in the tree. The plan's sentence that it already exists, because the stub is the default, is false.

@@ -1,6 +1,6 @@
 # ADR-004 — A receipt is immutable; query is a separate path
 
-**Status:** Accepted in RFC-001 §4.5 and §5 · **Date:** 2026-10-29 · **Context:** RFC-001 §4.5, §5
+**Status:** Accepted in RFC-001 §4.5 and §5 · **Date:** 2026-10-29 · **Review trigger revised:** 2026-10-30 · **Context:** RFC-001 §4.5, §5
 
 ## Context
 
@@ -24,4 +24,4 @@ Bad. A client that renders the receipt and never calls `query` shows stale text 
 
 ## Review trigger
 
-Revisit when a client is required to learn the live note from a resend, because it has no `query`. Staleness is then a wrong answer, where today it is the rule the official pair demonstrates: the resent conflict still at revision 2, `query` at 3. Nothing in this delivery counts callers that skip `query`. The exit is to return the live note beside the frozen receipt and leave the stored row alone. Rewriting the row on read would destroy the original result the resend exists to repeat. Migration is that extra read and a field on the response, and steps 7 and 8 of the official example stop being the contract.
+When a client has no `query` and must learn the live note from a resend, this decision is wrong: the frozen receipt is then a stale answer, where today it is the rule the official pair demonstrates, the resent conflict still at revision 2 and `query` at 3. The exit is to return the live note beside the frozen receipt and leave the stored row alone. Rewriting the row on read would destroy the original result the resend exists to repeat. Migration is that extra read and a field on the response, and steps 7 and 8 of the official example stop being the contract. Nothing in this delivery counts callers that skip `query`.

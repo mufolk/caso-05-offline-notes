@@ -1,6 +1,6 @@
 # ADR-006 — Domain failures are values, not exceptions
 
-**Status:** Accepted in the `ProcessResult` union · **Date:** 2026-10-29 · **Context:** RFC-001 §5
+**Status:** Accepted in the `ProcessResult` union · **Date:** 2026-10-29 · **Review trigger revised:** 2026-10-30 · **Context:** RFC-001 §5
 
 ## Context
 
@@ -24,4 +24,4 @@ Bad. Every call is a switch. A throw is outside that promise: the "one result pe
 
 ## Review trigger
 
-Revisit when a domain outcome — `conflict`, `invalid`, `note_not_found`, or `id_reused` — arrives as a rejection of `uow.run`, so the queue continues only because the fold or the empty `catch` swallowed it. You are then paying for the switch and still paying for the catch the values were adopted to avoid. An HTTP adapter that maps a returned value onto a status code is not this fact: the core would still have returned a value. The exit, and only if the product has dropped the rule that an error must not stop the rest of the queue, is to throw and to catch in `processAll` alone. Migration is that one catch and taking the domain tags off the return path, about a day, and it is a reversal of this decision. This delivery throws no domain tag, and nothing records a rejection by tag.
+When a domain outcome — `conflict`, `invalid`, `note_not_found`, or `id_reused` — arrives as a rejection of `uow.run`, this decision is wrong: the queue continues only because the fold or the empty `catch` swallowed it, so the caller pays for the switch and still pays for the catch the values were adopted to avoid. The exit, and only if the product has dropped the rule that an error must not stop the rest of the queue, is to throw and to catch in `processAll` alone. Migration is that one catch and taking the domain tags off the return path, about a day, and it reverses this decision. An HTTP adapter that maps a returned value onto a status code is not this fact: the core would still have returned a value. This delivery throws no domain tag, and nothing records a rejection by tag.

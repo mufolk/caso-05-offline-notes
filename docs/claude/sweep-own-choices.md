@@ -94,7 +94,7 @@
 | # | Assumption | Why it is not a rule | Kind |
 |---|---|---|---|
 | 42 | `op_id`s are practically unique; the predicates do not enforce UUID. | Risk 2. The official example's `O1` forbids enforcing the format. | A |
-| 43 | Receipt retention is unbounded and undecided. Deleting one before a client resends applies that operation twice. | Risk 1. Feeds the second gatilho of ADR-003. | A |
+| 43 | Receipt retention has no window. Deleting one before a client resends applies that operation twice. The exit, written on ADR-003, is a tombstone. No window length is chosen. | Risk 1. First paragraph of ADR-003's review trigger. | A |
 
 ---
 

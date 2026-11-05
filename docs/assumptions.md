@@ -58,7 +58,7 @@ ASM-44 and ASM-45 have no sweep row: they were decided after the sweep was writt
 
 ## Unit of work and lock (RFC §4.3)
 
-ASM-21, ASM-22, ASM-26 and ASM-28 point at ADR-005. ADR-008 and ADR-009 were folded into that file as seams on 2026-10-29. They are not filed.
+ASM-21, ASM-22, ASM-26 and ASM-28 point at ADR-005. ADR-008 and ADR-009 were merged into that file on 2026-10-30. They are not filed, not proposed as intent, and not an open cut.
 
 | ID | Rule | What the statement leaves open | Kind | Lives in | Proof |
 |---|---|---|---|---|---|
@@ -108,7 +108,7 @@ ASM-45 points at ADR-005. The scope question is closed: seams only, adapter not 
 | ID | Assumption | Why it is not a rule | Kind | Lives in | Proof |
 |---|---|---|---|---|---|
 | ASM-42 | `op_id`s are practically unique. The predicates do not enforce UUID format. | Risk 2. The official example's `O1` forbids enforcing the format. | A | §7 risk 2 | — |
-| ASM-43 | Receipt retention is unbounded and undecided. Deleting a receipt before its client resends applies that operation twice. | Risk 1. Feeds the second gatilho of ADR-003. | A | §7 risk 1 · ADR-003 | — |
+| ASM-43 | Receipt retention has no window. Deleting a receipt before its client resends applies that operation twice. That double apply is the fact that makes unbounded retention wrong. The exit is a tombstone that keeps the `op_id` and returns a bare expired result. No window length is chosen. | Risk 1. The first paragraph of ADR-003's review trigger. | A | §7 risk 1 · ADR-003 | — |
 
 ---
 
@@ -116,6 +116,6 @@ ASM-45 points at ADR-005. The scope question is closed: seams only, adapter not 
 
 1. **Closed — REQ-22.** "Cada nota tem id, texto e um número de revisão." is a sentence of the statement carrying an obligation, so it is numbered REQ-22 in `docs/reqs.md`, with the verbatim quote. ASM-04 cites it and records only the exclusion — no timestamp, no author, hence no clock to resolve by. Open point 2 of `reqs.md` closed with it.
 2. **Two Proof cells that Stage 1 will not fill.** ASM-05 is pure behaviour, with no type to write. ASM-14 has a type half — the content shape, written in Stage 1 — and a behaviour half, the `===` per field with `op_id` excluded. Nine of Stage 1's ten rows are shapes; these two still owe tests.
-3. **Closed — ADR pointers, 2026-10-29.** ASM-21, ASM-22, ASM-26 and ASM-28 point at ADR-005. ADR-008 and ADR-009 were folded into that file as seams. They are not filed. ASM-45 was already pointing there.
+3. **Closed — ADR pointers, 2026-10-30.** ASM-21, ASM-22, ASM-26 and ASM-28 point at ADR-005. ADR-008 and ADR-009 are merged into that file. They are not filed, not proposed as intent, and not an open cut. ASM-45 was already pointing there.
 4. **Stage 3 landed, 2026-10-29.** `process`, `processAll`, `query` and the in-memory unit of work are written; 52 calls across five spec files are green and both packages typecheck. Twelve mutations were run against the implementation to check the suite bites: eleven were caught, and the one survivor (a concurrent batch in place of the fold) is behaviour-identical on this unit of work, which is the evidence behind ASM-27's review-not-debt split. Two cells changed meaning rather than status: ASM-39's three calls are a set, not independent witnesses, and ASM-25's seam landed, which is why ASM-28's unreachability now rests on a single `uow.commit` call instead of on the absence of an `await`. Still `partial`: ASM-13, by design. The re-entry race, the two `run` calls, and the three fast-check properties are written. |
-5. **ASM-03 and the plan's ADR-002 title.** `docs/plano-de-ataque.md` describes ADR-002 as "ledger of operations as truth; note state is a projection". RFC-001 §3 decided the opposite, and ASM-03 follows the RFC. A banner dated 2026-10-29 at the top of the plan records that supersession, and a second one: Nest and Postgres are not built in this delivery. The Oct 24 paragraphs were not rewritten. Decision and Review trigger were filled on 2026-10-29.
+5. **Closed — ASM-03 and the plan's ADR-002 title, 2026-10-30.** RFC-001 §3 decided there is no operation ledger, and ASM-03 follows the RFC. The plan's decision sentences now say the same thing and quote the Oct 24 ledger wording as what was reversed. Nest and Postgres are not built. ADR-008 and ADR-009 are merged into ADR-005. Review triggers were rewritten the same day so each one opens with the fact that makes the decision wrong.

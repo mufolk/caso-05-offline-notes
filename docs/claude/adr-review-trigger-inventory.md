@@ -1,30 +1,30 @@
 # Inventory of raw material for the review triggers
 
-**Status:** raw material from before the fields were written. Decision and Review trigger now live in `docs/adr/`, filled 2026-10-29. This file is not those fields. ADR-008 and ADR-009 are not filed: folded into ADR-005 as seams on 2026-10-29. Two citations were already wrong against the accepted §7, which has not been renumbered in this repo: the first commit of that section has the same five items it has now. Starvation is risk 3, not risk 4; risk 4 is the model, ADR-010. Atomicity of the revision check and the write is not a numbered risk; risk 2 is `op_id` collisions. The separate write step is one of the proposal items §7 says this revision closed, and the closing note does not give it a number.
+**Status:** raw material. The Review trigger fields live in `docs/adr/`. On 2026-10-30 each one was rewritten so the first sentence is the observable fact that makes the decision wrong, and the next sentence is the exit. This file is not those fields. ADR-008 and ADR-009 are merged into ADR-005: not filed, not proposed as intent, and not an open cut. Two citations were already wrong against the accepted §7, which has not been renumbered in this repo: the first commit of that section has the same five items it has now. Starvation is risk 3, not risk 4; risk 4 is the model, ADR-010. Atomicity of the revision check and the write is not a numbered risk; risk 2 is `op_id` collisions. The separate write step is one of the proposal items §7 says this revision closed, and the closing note does not give it a number.
 **Date:** 2026-10-28
 **Source:** RFC-001 §7 (risks), pending items from Session 0, and the conversations of 27 and 28 October.
 **Imported into the repo:** 2026-10-28, from the project workbench. English, content unchanged except where a later decision is noted.
 
-## Settled 2026-10-29, before any Decision or Review trigger sentence
+## What was settled, and what changed on 2026-10-30
 
 Checked against the repo in this session. `packages/core/src/memory.ts` is in the tree. `packages/core/package.json` depends on `contracts` and on nothing else. No Zod import exists in the repo. Eight ADR files are filed (`001`–`007` and `010`).
 
-**The plan is not left untouched.** A banner at the top of `docs/plano-de-ataque.md` demotes two Oct 24 claims. The body of the plan was not rewritten.
+**The plan's decision sentences were corrected on 2026-10-30.** A banner that left the old sentence in the body was the two documents disagreeing. The Oct 24 wording is quoted beside the decision that shipped.
 
-1. **Ledger.** RFC-001 §3 wins. No operation ledger. ADR-002 follows the RFC. The plan's row 002 is the stale title.
-2. **Nest and Postgres built.** ADR-005 wins for this delivery, and it does not win by citing RFC-001 §8. That section still schedules NestJS and says Nest stays if time runs short. The cut on 2026-10-29 took the whole envelope, including Nest, on purpose. The banner says so. A one-line "superseded by RFC-001" on both points would have been false on the second.
-3. **008 and 009 fold into ADR-005 as seams.** Not filed as intent, not cut. There is no schema, so a constraint and an `UPDATE … WHERE revision = $base` are not accepted decisions about code that exists. They are the shape of the unbuilt adapter, and they become their own ADRs when an adapter is written. ASM-21, ASM-22, ASM-26 and ASM-28 now point at ADR-005.
-4. **A trigger may name a fact this delivery does not measure.** The same sentence names the instrument and says nothing here provides it. No threshold is invented to fill a field. Applied below to 001, 003, 005 and 010. The sentences themselves stay Gui's.
+1. **Ledger.** RFC-001 §3 wins. No operation ledger. ADR-002 follows the RFC. The plan's "Modelo de dados", row 002, the limits list, and the video sketch say the same thing, and they quote the Oct 24 ledger sentence as what was reversed.
+2. **Nest and Postgres built.** ADR-005 wins for this delivery, and it does not win by citing RFC-001 §8. That section still contains the old cut order, Nest stays; the closing paragraph records the cut that took Nest too. The cut on 2026-10-29 took the whole envelope, including Nest, on purpose.
+3. **008 and 009 are merged into ADR-005, 2026-10-30.** Not filed, not proposed as intent, not an open cut. There is no schema, so a constraint and an `UPDATE … WHERE revision = $base` are not accepted decisions about code that exists. Their falsifiers are written on ADR-005: the constraint that accepts what `check` rejects, and two requests that both pass the revision comparison and both write. They do not split back out into their own files. ASM-21, ASM-22, ASM-26 and ASM-28 point at ADR-005.
+4. **A trigger may name a fact this delivery does not measure.** The same sentence names the instrument and says nothing here provides it. No attempt count is chosen for starvation, and no retention window is chosen. The one level set on 2026-10-30 is ADR-010: fewer proposals come back `accepted` than are refused. Leaving that rate with no level was the blank field.
 
-**ADR-005's trigger fact, chosen.** The duplicated rule: a predicate in the core and a persisted constraint that can disagree. Instrument that does not exist: a schema, and an insert the predicate would reject. The atomicity seam and the READ COMMITTED seam stay named on ADR-005 and do not become its trigger. Using either as the trigger would make ADR-005 about Postgres, which is the filing that was just refused. They get their own triggers if those ADRs are split out later.
+**ADR-005's trigger fact, chosen.** The duplicated rule: a predicate in the core and a persisted constraint that can disagree. Instrument that does not exist: a schema, and an insert the predicate would reject. The merged ADR-009 is a second paragraph on the same field, not a replacement of this fact: two requests both pass the revision comparison and both write, and the exit is `UPDATE … WHERE revision = $base`. The READ COMMITTED seam stays an ingredient and is not a trigger. Neither 008 nor 009 splits back out into its own file.
 
-**ADR-003's trigger fact, chosen.** Receipt retention (ASM-43, RFC-001 §7 risk 1). A receipt deleted inside the resend window makes the operation apply twice, which is the decision breaking. Instrument that does not exist: a receipt count, or an age, or a deletion. This delivery keeps every receipt and records none of the three. The `op_id` collision notes stay as the alternative's notes. The `-0` echo stays a consequence: the retry is unaffected, because the fingerprint collapses `-0` and `0`. Neither fact makes stored-receipt idempotency the wrong decision.
+**ADR-003's trigger fact, chosen.** Receipt retention (ASM-43, RFC-001 §7 risk 1). A receipt deleted inside the resend window makes the operation apply twice, which is the decision breaking. Instrument that does not exist: a receipt count, or an age, or a deletion. This delivery keeps every receipt and records none of the three. The bare-code half from the collision notes is the second paragraph of the same field: once the key is scoped per client, or the receipt stores an owner, returning only the code is the wrong tradeoff. That paragraph does not make storing the receipt the wrong decision. The `-0` echo stays a consequence: the retry is unaffected, because the fingerprint collapses `-0` and `0`.
 
-**ADR-001's trigger fact stays starvation.** Instrument that does not exist: a count of consecutive `conflict` results on one note before an `accepted`. No attempt threshold is chosen. The written trigger chooses the short edit lease. A per-note queue and assisted merge are refused there.
+**ADR-001's trigger fact stays starvation.** The fact that makes the decision wrong: one note's conflicts stay consecutive and the attempt ends without an `accepted`. No attempt count is chosen. The exit is the short edit lease. A per-note queue and assisted merge are refused there. Instrument that does not exist: a count of consecutive `conflict` results on one note, and a client identity.
 
-**ADR-010's trigger fact stays the accepted-proposal rate.** Instrument that does not exist: proposals offered against proposals that later come back `accepted`. This delivery has no model, no counter, and no flag. The plan's sketch says the flag already exists because the stub is the default. ADR-010's consequences already say the opposite, and the repo agrees with the ADR: there is nothing to turn off. The way out is a flag that would be built with the adapter and would default to the stub. It is not in the tree. No percentage is chosen.
+**ADR-010's trigger fact stays the accepted-proposal rate.** The fact that makes the decision wrong: proposals offered, and fewer of them come back `accepted` than are refused. The exit is a flag built with the adapter, defaulting to the stub. The plan's old sentence said that flag already exists because the stub is the default. It does not. There is no model, no counter, and no flag in the tree.
 
-Each block carries the **candidate observable fact**, **what the decision starts to cost** once that fact happens, and the **way out** discussed. The three things the field needs. The fields were written into the ADRs on 2026-10-29. This file stays the ingredients.
+Each block carries the **candidate observable fact**, **what the decision starts to cost** once that fact happens, and the **way out**. The three things the field needs. The fields were written into the ADRs on 2026-10-29 and rewritten on 2026-10-30 so each one leads with the fact that makes the decision wrong. This file stays the ingredients. The exit in the ADR is the one that counts.
 
 ---
 
@@ -35,19 +35,19 @@ Recorded as risk 3 in RFC-001 §7. Risk 4 in that section is the model, ADR-010.
 
 **What it starts to cost:** the user who worked the most is the one who loses the most work. The friction stops being "resolve a conflict" and becomes "never manage to save".
 
-**Ways out discussed:** none yet. Obvious candidates to evaluate — a queue per note, a short edit lease, or assisted merge with human confirmation. Worth measuring first: how many attempts until a conflict is resolved. No count is chosen. The instrument would be consecutive `conflict` results on one note before an `accepted`, and this delivery has no such counter. See the settled block at the top.
+**Way out, written 2026-10-30.** A short edit lease. A per-note queue and assisted merge are refused in the ADR. No attempt count is chosen. The instrument would be consecutive `conflict` results on one note before an `accepted`, and this delivery has no such counter. See the settled block at the top.
 
 ---
 
 ## ADR-002 — source of truth
 
-**Divergence, settled 2026-10-29.** The plan of attack says "operation ledger as truth; note state is a projection". RFC-001 §3 decided the opposite: there is no ledger, the receipts already store every valid operation with its content and result. ADR-002 describes the RFC. The plan's title stays in the body, demoted by the banner at the top of `docs/plano-de-ataque.md`. Numbered as ASM-03 in `docs/assumptions.md`.
+**Divergence, closed 2026-10-30.** The plan of attack said "operation ledger as truth; note state is a projection". RFC-001 §3 decided the opposite: there is no ledger. The plan's decision sentences now say so, and they quote the Oct 24 wording as what was reversed. ADR-002 follows the RFC. Numbered as ASM-03 in `docs/assumptions.md`.
 
 **Candidate observable fact:** a replay or audit requirement appearing that demands rebuilding a note from scratch. Today that is not possible — it is the price declared in the RFC.
 
 **What it starts to cost:** the absence of the ledger stops being a saving and becomes a debt; recomposing history from receipts is possible but partial.
 
-**Way out discussed:** none yet.
+**Way out, written 2026-10-30.** The ledger this ADR rejected, with the note as a fold. Not a backfill. See the ADR.
 
 ---
 
@@ -55,17 +55,17 @@ Recorded as risk 3 in RFC-001 §7. Risk 4 in that section is the model, ADR-010.
 
 Already has its own file: `docs/claude/adr-003-op-id-collision-notes.md` (`op_id` collision between clients, authn vs authz, *defense in depth*).
 
-**Trigger fact, chosen 2026-10-29.** Receipts grow forever, and nobody knows how long they must be kept. Risk 1 of RFC-001 §7. Numbered as ASM-43. This is the fact that makes the decision wrong. The collision notes and the `-0` echo below are not the trigger. See the settled block at the top.
+**Trigger fact, chosen 2026-10-29, written as the first sentence 2026-10-30.** Receipts grow forever. Risk 1 of RFC-001 §7. Numbered as ASM-43. A receipt deleted or aged out, then resent, applies a second time. That is the fact that makes unbounded retention wrong. The bare-code half from the collision notes is the second paragraph of the same field. The `-0` echo below is not a trigger.
 
 **What it starts to cost:** deleting a receipt before its client resends makes the operation apply twice. Idempotency has a shelf life equal to the retention window.
 
-**Ways out discussed:** none. The retention window still has to be decided, along with what happens to a resend that falls outside it.
+**Way out, written 2026-10-30.** A tombstone that keeps the `op_id` reserved and returns a bare expired result. No window length is chosen. The bare-code half, which this file's collision notes left open, is the second paragraph of the ADR: once the key is scoped per client or the receipt stores an owner, returning only the code is the wrong tradeoff, and the exit is the stored receipt or the diverging field, only to that owner.
 
 **Third observable fact, not yet noted there:** a receipt or a query starts returning `base_revision`. Numbered against ASM-13. Today `accepted` carries no `base_revision`, and `===` treats `-0` as `0`, so a write that normalized `-0` to `0` is invisible. The three calls in ASM-13's Proof cell still pass. "The receipt row keeps the number as sent" protects a seam that does not exist. `check` returning `Object.is(base_revision, -0)` is the predicate's return value, and it is already proved; it says nothing about the row. ASM-13 is the second thing that event touches: publishing the field makes "the receipt row keeps the number as sent" falsifiable, and that Proof cell owes a fourth call, which is what can take the row off `partial`.
 
 **What it starts to cost:** the moment that field is echoed, a normalized row and a preserving row disagree, and a client that sent `-0` can be shown `0`. The retry is unaffected, because the fingerprint collapses the two either way. The lie is only in the echo.
 
-**Way out discussed:** decide at the write, before any client has been shown the number. The row keeps the bits and the new field echoes them, or the predicate normalizes `-0` to `0` on the way in so the row and the fingerprint cannot diverge. The migration is that one policy. This block is not the Review trigger. That field is receipt retention. The `-0` echo stays a consequence.
+**Way out discussed:** decide at the write, before any client has been shown the number. The row keeps the bits and the new field echoes them, or the predicate normalizes `-0` to `0` on the way in so the row and the fingerprint cannot diverge. The migration is that one policy. This block is not the Review trigger. That field is receipt retention, then the bare-code half. The `-0` echo stays a consequence.
 
 ---
 
@@ -83,7 +83,7 @@ No inventory block existed for this one. The fact in the Review trigger — a cl
 
 **What it starts to cost:** the promise of "zero dependencies in the core" still stands, but the boundary gains a point of duplication that has to be kept in sync.
 
-**Way out discussed:** none.
+**Way out, written 2026-10-30.** One source: the predicate stays the rule, and the constraint is generated from the closed key set or it is not shipped. See the ADR.
 
 **Second candidate observable fact (ASM-45, the rejected `index` stamp).** Results cross a boundary that does not guarantee order. "One in-memory call, nothing between the call and the caller" is a property of the core's current packaging, not of the protocol. A JSON array preserves order, so a single HTTP call still holds. What breaks the correlation is a batch split across requests, a queue, or any client that merges responses.
 
@@ -109,17 +109,17 @@ No inventory block existed for this one. The fact in the Review trigger — one 
 
 ---
 
-## ADR-008 and ADR-009 — folded into ADR-005 as seams
+## ADR-008 and ADR-009 — merged into ADR-005
 
-**Settled 2026-10-29: path 2.** Not filed. Not kept as intent ADRs. Not cut. Both describe SQL that is not in the repo, so neither is an accepted decision about code that exists. They are named seams of ADR-005: a future constraint that mirrors an invariant, and the optimistic lock as `UPDATE … WHERE revision = $base`. They become their own ADRs when an adapter is written. ASM-21, ASM-22, ASM-26 and ASM-28 point at ADR-005. The facts below stay ingredients for that split. They are not ADR-005's review trigger. That trigger is the duplicated rule, chosen in the settled block at the top.
+**Settled 2026-10-30: merge.** Not filed. Not proposed as intent. Not an open cut. Both describe SQL that is not in the repo, so neither is an accepted decision about code that exists. Their falsifiers are on ADR-005. A constraint that accepts what `check` rejects is ADR-005's review trigger. Two requests that both pass the revision comparison and both write are the merged ADR-009: the exit is `UPDATE … WHERE revision = $base` in the same transaction as the receipt write. ASM-21, ASM-22, ASM-26 and ASM-28 point at ADR-005. The facts below stay ingredients. A READ COMMITTED `query` is not either trigger.
 
-**Related observable fact:** the revision check and the write have to be atomic. Two concurrent requests on the same note can both pass the revision comparison. In memory it is free; in the envelope it is not. This is not a numbered risk in RFC-001 §7 — risk 2 there is `op_id` collisions. It is the seam ADR-009 would have been. That ADR is not filed; the seam is named in ADR-005 until an adapter is written.
+**Related observable fact:** the revision check and the write have to be atomic. Two concurrent requests on the same note can both pass the revision comparison. In memory it is free; in the envelope it is not. This is not a numbered risk in RFC-001 §7 — risk 2 there is `op_id` collisions. It is the merged ADR-009. The exit is written on ADR-005. It does not get its own file when an adapter is written.
 
 **Second observable fact (ASM-26).** A Postgres `query` exists and is a plain `SELECT` at READ COMMITTED. The core suite stops being evidence about reads. In-memory `query` holds the writer lock for the whole read, so it cannot produce the read that observes a note at revision N+1 before, or without, the matching receipt.
 
 **What it starts to cost:** read-skew against the real adapter is invisible to every green core run. A reviewer who treats the suite as proof that `query` and the receipt move together is reading a stronger adapter than the one that ships.
 
-**Way out discussed:** argue the read when the Postgres `query` is written. The in-memory lock stays as it is; the argument belongs to the adapter. No snapshot shape is chosen here. This block is not ADR-005's Review trigger. That trigger is the duplicated rule. The READ COMMITTED seam stays an ingredient until an adapter is written.
+**Way out discussed:** argue the read when the Postgres `query` is written. The in-memory lock stays as it is; the argument belongs to the adapter. No snapshot shape is chosen here. This block is not ADR-005's Review trigger. That trigger is the constraint that accepts what `check` rejects. The READ COMMITTED seam stays an ingredient.
 
 **Third observable fact (ASM-25, ASM-28).** Registry lookup on the in-memory unit of work becomes `async`. Today the callback passed to `run` does not suspend: `receipts.get`, `notes.set` and `receipts.set` are synchronous `Map` calls, so "no `await` after the first write" is true by inspection, and no execution produces a half-written pair. That is the construction ASM-28's `—` rests on. The atomicity called free in the fact above is this construction, and it is free only while that body does not suspend. An `async` lookup is a suspension inside the locked region. Exclusion still holds: `tail` is held across the whole callback, so nothing interleaves. Keeping that suspension before the writes, rather than between the two `Map.set`s, stops being structural and becomes a rule someone has to not break. "Unreachable" becomes "unreachable as currently written."
 
@@ -127,15 +127,15 @@ One event, two rows, the same shape as ADR-003's third fact touching ASM-13. ASM
 
 **What it starts to cost:** the `—` no longer means a half-written pair cannot happen. An `await` between the two writes is then a possible edit, the suite stays green, and the only thing still keeping the pair together in memory is review of the body. The adapter that needs all-or-nothing is the Postgres one, which has `ROLLBACK`.
 
-**Way out discussed:** take the trade on purpose. The seam lands so one `process` serves a Postgres unit of work (ASM-21). ASM-25's overlap call becomes a real debt and gets paid. ASM-28's `—` moves onto `ROLLBACK` in that adapter, and the in-memory body keeps "compute the receipt, then write" as review. This block is not ADR-005's Review trigger. That trigger is the duplicated rule. The pointer is ADR-005 until an adapter exists and these seams split back out.
+**Way out discussed:** take the trade on purpose. The seam lands so one `process` serves a Postgres unit of work (ASM-21). ASM-25's overlap call becomes a real debt and gets paid. ASM-28's `—` moves onto `ROLLBACK` in that adapter, and the in-memory body keeps "compute the receipt, then write" as review. This block is not ADR-005's Review trigger. That trigger is the constraint that accepts what `check` rejects. The pointer stays ADR-005. These seams do not split back into their own ADRs.
 
 ---
 
 ## ADR-010 — the LLM proposes, it does not decide
 
-The plan sketches a trigger that is not Gui's text: accepted-proposal rate below some threshold, then turn the feature off by a flag that already exists because the stub is the default.
+The plan used to sketch a trigger with no level, and a flag that already existed because the stub was the default. That flag sentence was corrected in the plan on 2026-10-30. The flag is not in the repo.
 
-**Fact chosen, 2026-10-29.** The rate stays the fact. No threshold is chosen. The instrument, which this delivery does not have, is proposals offered against proposals that later come back `accepted`. The flag in the plan's sketch is not in the repo. ADR-010 already says there is no adapter, no flag, and no count. The way out is a flag built with the adapter, defaulting to the stub. It is not something this delivery can flip.
+**Fact chosen, 2026-10-30.** Proposals offered, and fewer of them come back `accepted` than are refused. That is the level. The instrument, which this delivery does not have, is proposals offered against proposals that later come back `accepted`. The exit is a flag built with the adapter, defaulting to the stub. There is nothing in the tree to flip.
 
 ---
 

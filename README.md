@@ -154,14 +154,15 @@ How those checks were made, and the other times a suggestion was kept or dropped
 
 ## 7. Architecture decisions
 
-Eight are filed under `docs/adr/`. ADR-008 and ADR-009 are not filed: on 2026-10-29
-they were folded into ADR-005's Context as seams of an adapter that is not built.
-**Decision** and **Review trigger** are filled in every file.
+Eight are filed under `docs/adr/`. ADR-008 and ADR-009 are not filed: on 2026-10-30
+they were merged into ADR-005. Not proposed as intent, and not left as an open cut.
+**Decision** and **Review trigger** are filled in every file. Each review trigger
+opens with the fact that makes that decision wrong, and names the exit.
 
 | ADR | What it records |
 |---|---|
 | [001](docs/adr/001-optimistic-concurrency-by-revision.md) | Optimistic concurrency by revision, not last-write-wins. |
-| [002](docs/adr/002-note-and-receipts-are-the-truth.md) | The current note plus the receipts are the truth. There is no operation ledger. The plan of attack titles this the other way; the RFC is the one that shipped. |
+| [002](docs/adr/002-note-and-receipts-are-the-truth.md) | The current note plus the receipts are the truth. There is no operation ledger. The plan of 24 October said the opposite; RFC-001 §3 is the decision that shipped, and the plan now quotes that reversal. |
 | [003](docs/adr/003-idempotency-by-receipt-and-fingerprint.md) | Idempotency by stored receipt plus a fingerprint of the content. |
 | [004](docs/adr/004-receipt-immutable-query-separate.md) | A receipt is immutable. `query` is a separate path. |
 | [005](docs/adr/005-core-without-framework-dependencies.md) | The core imports no framework and no database. The envelope is an adapter, and it is not built. |
@@ -183,7 +184,9 @@ they were folded into ADR-005's Context as seams of an adapter that is not built
   deployment would need.
 - **No deletion.** Explicitly out of scope.
 - **Receipts are never compacted.** They grow forever. Dropping one before its client
-  resends applies that operation twice — risk 1 of RFC-001 §7, and still open.
+  resends applies that operation twice — risk 1 of RFC-001 §7. That double apply is
+  what makes unbounded retention wrong. The exit is a tombstone that keeps the
+  `op_id` and returns a bare expired result (ADR-003). No window length is chosen.
 - **No LLM adapter.** Planned as ADR-010: the model would propose a merged text as an
   ordinary operation, with a new `op_id` and the current base revision, so it has no
   authority over state by construction. Not built.

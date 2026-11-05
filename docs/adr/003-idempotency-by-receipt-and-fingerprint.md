@@ -1,6 +1,6 @@
 # ADR-003 — Idempotency by stored receipt plus a fingerprint of the content
 
-**Status:** Accepted in RFC-001 §5 and in `process` · **Date:** 2026-10-29 · **Context:** RFC-001 §4.1, §5
+**Status:** Accepted in RFC-001 §5 and in `process` · **Date:** 2026-10-29 · **Review trigger revised:** 2026-10-30 · **Context:** RFC-001 §4.1, §5
 
 ## Context
 
@@ -26,4 +26,6 @@ Bad. The honest client that reused its own id gets a bare code and no hint which
 
 ## Review trigger
 
-Revisit when a receipt is deleted or aged out while its client can still resend. The break is observable: the resend applies a second time, because a missing row is a first arrival and cannot be told from an `op_id` that was never seen. This delivery keeps every receipt and records no count, no age, and no deletion, so the instrument is not in the tree. No window is chosen. A resend that arrives outside the window must not apply and must not be handed a reconstructed body. The exit is a tombstone that keeps the `op_id` reserved and returns a bare expired result. The original receipt is then gone, which is the same price as ADR-002, taken on purpose. Migration is that row plus one branch on lookup. The body can go; the key cannot, unless you accept the double apply. Per-client scoping of `op_id` is a different problem and is not this trigger.
+When a receipt is deleted or aged out and its client resends, this decision is wrong: the resend applies a second time, because a missing row is a first arrival and cannot be told from an `op_id` that was never seen. The exit is a tombstone that keeps the `op_id` reserved and returns a bare expired result, with no reconstructed body. The original receipt is then gone, which is the same price as ADR-002, taken on purpose. Migration is that row plus one branch on lookup. The body can go; the key cannot, unless the double apply is accepted. This delivery keeps every receipt and records no count, no age, and no deletion, so no window is chosen.
+
+When the registry key is `(client_id, op_id)`, or the receipt stores an owner the server checks before returning it, the bare `{type, op_id}` is wrong: the leak it buys is already closed by the key, and the honest client who reused their own id still learns nothing about which of `note_id`, `base_revision`, or `text` diverged. The exit is to return the stored receipt, or to name the field that diverged, and only to that owner. Migration is the owner column or the scoped key, plus that richer error, about a day, once a client identity exists. Authentication does not retire the bare code on its own. Roles protect the note, and a colliding `op_id` never touches the note. This delivery has no identity, so the channel stays closed by the bare code. Notes for that half: `docs/claude/adr-003-op-id-collision-notes.md`.

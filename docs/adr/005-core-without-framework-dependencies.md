@@ -1,12 +1,12 @@
 # ADR-005 — The core does not import a framework or a database; the envelope is an adapter
 
-**Status:** Accepted as a boundary; the adapter is not built · **Date:** 2026-10-29 · **Context:** RFC-001 §2, §8
+**Status:** Accepted as a boundary; the adapter is not built · **Date:** 2026-10-29 · **Review trigger revised:** 2026-10-30 · **Context:** RFC-001 §2, §8
 
 ## Context
 
 The statement does not ask for disk or HTTP. The vacancy does. `process` and `query` take a `UnitOfWork` they do not own. The in-memory adapter is the only implementation. `packages/core/package.json` depends on `contracts`, the types package in this repo, and on nothing else. No Nest, Postgres, Zod, or model client is imported.
 
-The plan's ADR-008 and ADR-009 are folded into this file as seams, decided 2026-10-29. They are not filed. There is no schema in the repo, so neither a Postgres constraint nor `UPDATE … WHERE revision = $base` is an accepted decision about code that exists. Both are named here as the shape of the unbuilt adapter: an invariant would live in a constraint, and the optimistic lock would be that `UPDATE`, not a distributed lock. They become their own ADRs when an adapter is written. ASM-21, ASM-22, ASM-26 and ASM-28 point here.
+ADR-008 and ADR-009 are merged into this file, decided 2026-10-30. They are not filed, not proposed as intent, and not left as an open cut. There is no schema in the repo, so neither sentence is a decision about code that exists. A persisted constraint that can disagree with `check` is the review trigger below. The revision check leaving memory is wrong when two requests on the same note both pass the comparison and both write; the exit is one statement, `UPDATE … WHERE revision = $base`, in the same transaction as the receipt write. That statement is not in the tree. ASM-21, ASM-22, ASM-26 and ASM-28 point here.
 
 ## Decision
 
@@ -26,4 +26,6 @@ Bad. "Zero runtime dependencies" survives opening the file. "Zero entries under 
 
 ## Review trigger
 
-Revisit at the first insert a persisted constraint accepts and `check` in `predicates.ts` would reject. The instrument is a schema and that insert. This delivery has neither, so the disagreement cannot be observed here. The exit is one source: the predicate stays the rule, and the constraint is generated from the closed key set or it is not shipped. Migration is hours to regenerate on an empty store, and a backfill if a violating row has already landed. Caught at the first disagreement, it stays hours. The atomicity seam and the READ COMMITTED seam are not this trigger.
+When a persisted constraint accepts an insert that `check` in `predicates.ts` would reject, this decision is wrong: the rule lives in two places and they disagree. The exit is one source. The predicate stays the rule, and the constraint is generated from the closed key set or it is not shipped. Migration is hours to regenerate on an empty store, and a backfill if a violating row has already landed. This delivery has no schema and no such insert, so the disagreement cannot be observed here.
+
+The merged ADR-009 is a different fact. When two concurrent requests on the same note both pass the revision comparison and both write, a check separated from the write is wrong. The exit is one statement, `UPDATE … WHERE revision = $base`, in the same transaction as the receipt write. Migration is that statement, paid when an adapter exists. A Postgres `query` at READ COMMITTED is not either fact. The core suite cannot show that read, and no snapshot shape is chosen here.

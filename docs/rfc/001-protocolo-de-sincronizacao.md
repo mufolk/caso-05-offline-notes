@@ -151,7 +151,7 @@ The statement does not name a lock, a transaction, or `async`. It names the fact
 - Hand-rolled mutex, no package. `packages/core` has zero dependencies.
 - Predicates run **before** any I/O and **before** the lock. They do not touch the registry.
 - From registry lookup through note write and receipt write: one locked transaction.
-- `query` takes the same global writer lock. Single process, one writer, no concurrent readers to starve, and the read is trivially consistent. The in-memory read is deliberately stronger than a Postgres `query` at READ COMMITTED: a plain `SELECT` takes no writer lock, readers and writers do not block each other, and the reader sees a snapshot. The core suite cannot produce the read that observes a note at revision N+1 before, or without, the matching receipt. That read is argued when a Postgres `query` exists. The ingredients sit with ADR-005, where the Postgres seams were folded on 2026-10-29.
+- `query` takes the same global writer lock. Single process, one writer, no concurrent readers to starve, and the read is trivially consistent. The in-memory read is deliberately stronger than a Postgres `query` at READ COMMITTED: a plain `SELECT` takes no writer lock, readers and writers do not block each other, and the reader sees a snapshot. The core suite cannot produce the read that observes a note at revision N+1 before, or without, the matching receipt. That read is argued when a Postgres `query` exists. The ingredients sit with ADR-005, where ADR-008 and ADR-009 were merged on 2026-10-30.
 
 **Triggers**
 

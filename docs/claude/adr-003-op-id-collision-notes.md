@@ -1,6 +1,6 @@
 # Notes for the review trigger of ADR-003
 
-**Status:** raw material for the collision alternative. The Review trigger in ADR-003 is receipt retention, not this note.
+**Status:** raw material for the bare-code half. Both halves are written in ADR-003's Review trigger as of 2026-10-30. Receipt retention is the first paragraph. This note is the second: the bare `{type, op_id}` becomes the wrong tradeoff once the key is scoped per client or the receipt stores an owner. The field this file used to leave open is that paragraph. It is not still blank.
 **ADR:** 003 — idempotency by stored receipt plus payload fingerprint.
 Not 010. What is at stake here is the idempotency key, not the LLM.
 **Conversation date:** 2026-10-28
@@ -42,19 +42,18 @@ It burdens one concrete case: the honest client with a bug of its own, which reu
 
 A consequences section containing only good things is suspect. That sentence is worth a point.
 
-## 5. What Gui still has to write
+## 5. Written into ADR-003 on 2026-10-30
 
-The field needs three things, in this order:
+The three things this section used to leave for later:
 
-1. **The observable fact** that makes the decision unnecessary or wrong.
-   Candidates raised in conversation: the key becoming scoped per client; the receipt starting to store its owner; the system gaining real authentication.
-2. **What the decision starts to cost** once that fact happens — that is, why keeping the bare code would stop paying for itself.
-3. **The way out, with a migration estimate.**
+1. **The observable fact.** The registry key is `(client_id, op_id)`, or the receipt stores an owner the server checks before returning it. Authentication alone is not that fact. Section 3 stands: roles protect the note, and a colliding `op_id` never touches it.
+2. **What the bare code starts to cost.** The leak is already closed by the key, and the honest client who reused their own id still learns nothing about which field diverged.
+3. **The way out.** Return the stored receipt, or name the field that diverged, and only to that owner. Migration is the owner column or the scoped key, plus that richer error, about a day, once a client identity exists.
 
 ## 6. English vocabulary for the final text
 
 `defense in depth` · `per-client scoping` · `receipt ownership check` · `leak channel` · `shared namespace` · `side channel` · `probing / key enumeration` · `authn vs authz`
 
-## 7. Pending
+## 7. Closed 2026-10-30
 
-Gui asked me to draft the field, for reasons of time. Refused, per the rule he set himself (project instructions plus the plan of attack, sections "ADRs" and "What the AI never writes"). The field remains open.
+The field this note refused to draft is the second paragraph of ADR-003's Review trigger. The refusal is recorded in `docs/ai-log.md`, entry 2. The later write is entry 6. This file stays the notes for that half. It is not a second blank field.

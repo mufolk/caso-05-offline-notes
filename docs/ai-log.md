@@ -1,6 +1,6 @@
 # How the AI was used, and how that was checked
 
-DEL-05. The plan asks for four to six entries, each in three lines: what was suggested, what was kept or changed, how it was checked. Five episodes are on record.
+DEL-05. The plan asks for four to six entries, each in three lines: what was suggested, what was kept or changed, how it was checked. Six episodes are on record.
 
 ## 1. 2026-10-29, 01:32 — a base ahead of the server
 
@@ -21,3 +21,7 @@ The red-team order, adopted in that sitting, looked up a known `op_id` before th
 ## 5. 2026-10-29 — the adversarial pass called every row met
 
 The pass had the statement, the code, and the matrix, and returned twenty-two met with an empty "não verificável" column. For REQ-10 it cited `text: op.text` with no concatenation; for REQ-11 it cited that no source file reads a clock. I did not keep that as proof. The README already called both rows absences, and a verdict that reads the implementation and calls the reading evidence is green and wrong. REQ-10 is now the test that fails if the texts are joined. REQ-11 stays declared: stubbing the clock on one path does not show it is never read.
+
+## 6. 2026-10-30 — the review trigger has to say what makes the decision wrong
+
+The dictated fields named a cost and an exit, then spent the rest of the paragraph on what this delivery cannot measure. The collision notes still said ADR-003's field was open, and the inventory still said the way out for 001, 002 and 005 had not been chosen. ADR-008 and ADR-009 were "folded as seams," which is none of intent, merge, or cut. Rewritten so each Review trigger opens with the fact that makes the decision wrong, then the exit and what the migration costs. The accepted-proposal level was set in this pass: fewer proposals come back `accepted` than are refused. The lease, the tombstone, the ledger, and the generated constraint were already the exits. ADR-008 and ADR-009 are merged into ADR-005. The plan's ledger sentence, which contradicted RFC-001 §3, now states the decision that shipped and quotes the old wording. Checked by reading each Review trigger against the fact already chosen in the inventory, and by searching the plan for a sentence that still makes the ledger the source of truth.

@@ -1,6 +1,6 @@
 # ADR-007 — The core checks a closed key set itself
 
-**Status:** Accepted in `predicates.ts` · **Date:** 2026-10-29 · **Context:** RFC-001 §4.1
+**Status:** Accepted in `predicates.ts` · **Date:** 2026-10-29 · **Review trigger revised:** 2026-10-30 · **Context:** RFC-001 §4.1
 
 The plan of attack titles this ADR "Zod at the edge, types inferred". There is no Zod in the repo, and the types in `packages/contracts` are written by hand. The RFC's sentence is the one that matches the code: Zod `.strict()` would express the same rule at an HTTP edge, and the core implements it with no library. That edge was cut with the envelope.
 
@@ -28,4 +28,4 @@ Bad. The rule lives in `predicates.ts` only. A later Zod edge would be a second 
 
 ## Review trigger
 
-Revisit when one payload gets two answers, `check` accepting what a second checker rejects, or the reverse. Hand-written checks become the wrong single source at that disagreement. The instrument is the second checker; this delivery has only `predicates.ts`. Adopting a library at the HTTP edge then costs a second copy of the closed set, unless that library becomes the source and crosses into the core, which is the dependency ADR-007 refuses. You do not get one source and a core free of the library. Migration, on that first disagreement, is to generate the edge schema from the predicate, or to delete the overlapping hand-written branches. Hours, before two clients depend on the two answers. A length cap at the edge is a different rule and is not this trigger.
+When one payload gets two answers, `check` accepting what a second checker rejects or the reverse, this decision is wrong: the hand-written predicate is no longer the single source. The exit is to generate the edge schema from the predicate, or to delete the overlapping hand-written branches. Migration is hours, on that first disagreement, before two clients depend on the two answers. A library that becomes the source crosses into the core, which this decision refuses. You do not get one source and a core free of the library. The instrument is the second checker; this delivery has only `predicates.ts`. A length cap at the edge is a different rule and is not this trigger.

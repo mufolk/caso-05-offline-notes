@@ -1,6 +1,6 @@
 # ADR-001 — Optimistic concurrency by revision, not last-write-wins
 
-**Status:** Accepted in RFC-001 and in the core · **Date:** 2026-10-29 · **Context:** RFC-001 §4.2, §6
+**Status:** Accepted in RFC-001 and in the core · **Date:** 2026-10-29 · **Review trigger revised:** 2026-10-30 · **Context:** RFC-001 §4.2, §6
 
 ## Context
 
@@ -26,4 +26,4 @@ Bad. The person who edited offline the longest is the one who resolves. On a bus
 
 ## Review trigger
 
-Revisit when one note shows a run of consecutive `conflict` results before an `accepted`, and resolving has turned into failing to save. The count is that run length. This delivery gives you nothing to count it with: there is no counter, and there is no client identity, so a pile of conflict receipts on one note is not yet one starving resolver. No threshold is set. The exit is a short edit lease, a server-side record beside the note, held from the resolving read until the next op, so other writers do not advance the revision while it is held. A per-note queue that applied the stale text would be last-write-wins or a merge, both already refused. Assisted merge does not exit this failure: a stale proposal conflicts like any other operation, and that feature is ADR-010. Migration is the lease record plus that check, about a day in an adapter, once an adapter exists. The result codes stay. The note still has no clock field; the lease is not one.
+When one note's `conflict` results stay consecutive and the attempt ends without an `accepted`, this decision is wrong: resolving has become failing to save, and the person who edited longest is the one who cannot. The exit is a short edit lease, a record beside the note, held from the resolving read until the next operation, so other writers do not advance the revision while it is held. Migration is that record and that check, about a day in an adapter, once an adapter exists. A per-note queue that applied the stale text would be last-write-wins or a merge, both already refused. Assisted merge does not exit this failure: a stale proposal conflicts like any other operation, and that feature is ADR-010. The result codes stay. The note still has no clock field; the lease is not one. This delivery has no counter and no client identity, so a pile of conflict receipts is not yet that run. No attempt count is chosen. The fact is the run that does not end in `accepted`.

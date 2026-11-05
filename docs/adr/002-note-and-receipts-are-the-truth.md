@@ -1,8 +1,8 @@
 # ADR-002 — Current note state plus receipts are the truth; there is no operation ledger
 
-**Status:** Accepted in RFC-001 §3 and ASM-03 · **Date:** 2026-10-29 · **Context:** RFC-001 §3
+**Status:** Accepted in RFC-001 §3 and ASM-03 · **Date:** 2026-10-29 · **Review trigger revised:** 2026-10-30 · **Context:** RFC-001 §3
 
-The plan of attack titles this ADR the other way: a ledger of operations as truth, and the note as a fold. That title is stale. A banner dated 2026-10-29 at the top of the plan records the supersession; the old paragraphs stay. This file follows RFC-001 §3.
+The plan of attack titled this ADR the other way on 24 October: a ledger of operations as truth, and the note as a fold. That sentence was corrected in the plan on 2026-10-30, and the old wording is quoted there as what RFC-001 §3 reversed. This file follows the RFC.
 
 ## Context
 
@@ -28,4 +28,4 @@ Bad. A note cannot be rebuilt. Receipts are a partial history: content and resul
 
 ## Review trigger
 
-The field says plainly that no replay path is designed. The fact is a requirement landing that asks for the note at an earlier revision, or for the order of applies. Nothing here measures that ask. Receipts cannot be promoted into the missing path: they are keyed by `op_id`, `id_reused` writes no row, and they are not a log of applies. The exit is the ledger this ADR rejected, with the note as a fold of it. That is a new store and a new read, not a backfill — the history that was never written is already gone. Migration is the ledger plus every reader that today uses the current note, paid once, when the requirement is real.
+When a caller asks for the note at an earlier revision, or for the order of applies, this decision is wrong: the server answers from the current note alone and cannot rebuild what was never stored. Receipts cannot be promoted into that path. They are keyed by `op_id`, `id_reused` writes no row, and they are not a log of applies. The exit is the ledger this ADR rejected, with the note as a fold of it. Migration is that store plus every reader that today uses the current note, paid once, when the ask is real. It is not a backfill. The history that was never written is already gone. Nothing in this delivery records that ask.
