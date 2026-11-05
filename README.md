@@ -162,7 +162,7 @@ opens with the fact that makes that decision wrong, and names the exit.
 | ADR | What it records |
 |---|---|
 | [001](docs/adr/001-optimistic-concurrency-by-revision.md) | Optimistic concurrency by revision, not last-write-wins. |
-| [002](docs/adr/002-note-and-receipts-are-the-truth.md) | The current note plus the receipts are the truth. There is no operation ledger. The plan of 24 October said the opposite; RFC-001 §3 is the decision that shipped, and the plan now quotes that reversal. |
+| [002](docs/adr/002-note-and-receipts-are-the-truth.md) | The current note plus the receipts are the truth. There is no operation ledger. The first draft of the plan (24 Oct) said the opposite; RFC-001 §3 is the decision that shipped, and ADR-002 records the reversal. |
 | [003](docs/adr/003-idempotency-by-receipt-and-fingerprint.md) | Idempotency by stored receipt plus a fingerprint of the content. |
 | [004](docs/adr/004-receipt-immutable-query-separate.md) | A receipt is immutable. `query` is a separate path. |
 | [005](docs/adr/005-core-without-framework-dependencies.md) | The core imports no framework and no database. The envelope is an adapter, and it is not built. |

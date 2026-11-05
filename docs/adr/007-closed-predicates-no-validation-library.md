@@ -2,7 +2,7 @@
 
 **Status:** Accepted in `predicates.ts` · **Date:** 2026-10-29 · **Review trigger revised:** 2026-10-30 · **Context:** RFC-001 §4.1
 
-The plan of attack titles this ADR "Zod at the edge, types inferred". There is no Zod in the repo, and the types in `packages/contracts` are written by hand. The RFC's sentence is the one that matches the code: Zod `.strict()` would express the same rule at an HTTP edge, and the core implements it with no library. That edge was cut with the envelope.
+The first draft of the plan (24 Oct) titles this ADR "Zod at the edge, types inferred". There is no Zod in the repo, and the types in `packages/contracts` are written by hand. The RFC's sentence is the one that matches the code: Zod `.strict()` would express the same rule at an HTTP edge, and the core implements it with no library. That edge was cut with the envelope.
 
 Zod `.strict()` stays a legal later copy of the same rule, at that adapter, when the adapter exists. It is not a checker you can point at today.
 

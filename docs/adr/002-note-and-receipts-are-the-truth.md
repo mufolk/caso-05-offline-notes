@@ -2,7 +2,7 @@
 
 **Status:** Accepted in RFC-001 §3 and ASM-03 · **Date:** 2026-10-29 · **Review trigger revised:** 2026-10-30 · **Context:** RFC-001 §3
 
-The plan of attack titled this ADR the other way on 24 October: a ledger of operations as truth, and the note as a fold. That sentence was corrected in the plan on 2026-10-30, and the old wording is quoted there as what RFC-001 §3 reversed. This file follows the RFC.
+The first draft of the plan (24 Oct) titled this ADR the other way: a ledger of operations as truth, and the note as a fold. RFC-001 §3 reversed that. This file follows the RFC. The draft is not in this history.
 
 ## Context
 
@@ -16,7 +16,7 @@ The server answers `query` from the current note alone, `{id, text, revision}`, 
 
 ## Alternatives considered
 
-**An operation ledger, with the note as a fold.** Buys replay, and an audit that can rebuild the note from scratch. Costs a log that only grows and a read that is a fold. This is what the plan of attack chose on paper. Worth choosing the moment someone asks for revision 2 as it was, and the current text is not enough.
+**An operation ledger, with the note as a fold.** Buys replay, and an audit that can rebuild the note from scratch. Costs a log that only grows and a read that is a fold. This is what the first draft of the plan (24 Oct) chose on paper. Worth choosing the moment someone asks for revision 2 as it was, and the current text is not enough.
 
 **The note alone, with no stored receipts.** Buys the smallest store. Costs the resend rule: the statement requires the original result back, including when that result was a conflict. Worth choosing only for a protocol that is idempotent by content rather than by `op_id`.
 

@@ -338,7 +338,7 @@ Session 0 is closed: `docs/reqs.md` carries 22 numbered REQs, and every one of t
 
 Cut order if time runs short: the React screen goes first, NestJS stays. The core, the ADRs and the README are never cut.
 
-Cut executed 2026-10-29: the whole envelope went, including NestJS, so the ADRs would exist. Session 3 did not happen. The sentence above is the rule as accepted; the cut broke it on purpose. ADR-005 is the record. The plan of attack's "Nest and Postgres built" is superseded by that cut, not by this section.
+Cut executed 2026-10-29: the whole envelope went, including NestJS, so the ADRs would exist. Session 3 did not happen. The sentence above is the rule as accepted; the cut broke it on purpose. ADR-005 is the record. A draft that had Nest and Postgres built is superseded by that cut, not by this section. The draft is not in this history.
 
 ---
 
