@@ -8,7 +8,7 @@ The assistant framed a base ahead of the server as a choice between `invalid` an
 
 ## 2. Two refusals to write the review triggers
 
-Asked twice for the review-trigger text. The fields stayed blank, and the inventory stayed raw material: the status line imported in `2c33b30` says no review-trigger field is written there, and that commit message says both ADR notes remain blank by rule. Checked against the plan's prohibition on the AI writing **Decisão** and **Gatilho de revisão**; the sentences in the files now are the ones dictated on 2026-10-29, in `5563ebc`, on top of the empty structure at `c6475dc`.
+Asked twice for the review-trigger text. The fields stayed blank, and the inventory stayed raw material: the status line imported in `4713536` says no review-trigger field is written there, and that commit message says both ADR notes remain blank by rule. Checked against the plan's prohibition on the AI writing **Decisão** and **Gatilho de revisão**; the sentences in the files now are the ones dictated on 2026-10-29, in `1b12764`, on top of the empty structure at `a6fe2da`.
 
 ## 3. The red-team order, adopted and then reversed
 
@@ -16,7 +16,7 @@ The red-team order, adopted in that sitting, looked up a known `op_id` before th
 
 ## 4. The Cursor and Claude trailers, kept
 
-`7843e75` carries `Co-authored-by: Cursor <cursoragent@cursor.com>`. `2c33b30` carries `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>` and a Claude session link. The trailers were not in the message that was passed for those commits; stripping them was on the table, and it was refused, because rewriting the commits would change the hashes a submission names. Checked with `git log`: both trailers are still on those two hashes.
+`d538f5c` carries `Co-authored-by: Cursor <cursoragent@cursor.com>`. `4713536` carries `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>` and a Claude session link. The trailers were not in the message that was passed for those commits; stripping them was refused. A later rewrite removed the plan files and the names. The trailers stayed. Checked with `git log`: both trailers are still on those two hashes.
 
 ## 5. 2026-10-29 — the adversarial pass called every row met
 
@@ -24,4 +24,4 @@ The pass had the statement, the code, and the matrix, and returned twenty-two me
 
 ## 6. 2026-10-30 — the review trigger has to say what makes the decision wrong
 
-The dictated fields named a cost and an exit, then spent the rest of the paragraph on what this delivery cannot measure. The collision notes still said ADR-003's field was open, and the inventory still said the way out for 001, 002 and 005 had not been chosen. ADR-008 and ADR-009 were "folded as seams," which is none of intent, merge, or cut. Rewritten so each Review trigger opens with the fact that makes the decision wrong, then the exit and what the migration costs. The accepted-proposal level was set in this pass: fewer proposals come back `accepted` than are refused. The lease, the tombstone, the ledger, and the generated constraint were already the exits. ADR-008 and ADR-009 are merged into ADR-005. The plan's ledger sentence, which contradicted RFC-001 §3, now states the decision that shipped and quotes the old wording. Checked by reading each Review trigger against the fact already chosen in the inventory, and by searching the plan for a sentence that still makes the ledger the source of truth.
+The dictated fields named a cost and an exit, then spent the rest of the paragraph on what this delivery cannot measure. The collision notes still said ADR-003's field was open, and the inventory still said the way out for 001, 002 and 005 had not been chosen. ADR-008 and ADR-009 were "folded as seams," which is none of intent, merge, or cut. Rewritten so each Review trigger opens with the fact that makes the decision wrong, then the exit and what the migration costs. The accepted-proposal level was set in this pass: fewer proposals come back `accepted` than are refused. The lease, the tombstone, the ledger, and the generated constraint were already the exits. ADR-008 and ADR-009 are merged into ADR-005. The plan's ledger sentence was corrected the same day so it states the decision that shipped and quotes the old wording. Checked by reading each Review trigger against the fact already chosen in the inventory. The plan files were removed from this history after that check; the reversal that remains is the one ADR-002 records.
