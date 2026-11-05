@@ -2,7 +2,7 @@
 
 **What this file is.** Every rule the solution obeys that the statement does **not** decide. The REQ matrix in `docs/reqs.md` is a transcription of the statement: each row carries a verbatim quote and has the statement's authority. These rows have no quote, by definition — they are choices, and a reviewer is entitled to disagree with any of them.
 
-**Method.** `docs/rfc/001-protocolo-de-sincronizacao.md` read end to end: every block marked **Own choices**, plus rules stated in prose or in an implementer block that no REQ covers. Raw sweep and the Session 2 build order: `docs/claude/sweep-own-choices.md`.
+**Method.** `docs/rfc/001-protocolo-de-sincronizacao.md` read end to end: every block marked **Own choices**, plus rules stated in prose or in an implementer block that no REQ covers. The ids below are that sweep's. The rows are the record.
 
 **Ids.** `ASM-nn` is sweep row `nn`. The numbering is the sweep's, so the build-order tables need no rename. Gaps in a section are rows that live in another section.
 
@@ -74,7 +74,7 @@ ASM-21, ASM-22, ASM-26 and ASM-28 point at ADR-005. ADR-008 and ADR-009 were mer
 
 ## Queue (RFC §4.4)
 
-ASM-45 points at ADR-005. The scope question is closed: seams only, adapter not built, recorded in ADR-005 on 2026-10-29. The rejected stamp's expiry still lives on that seam. ADR-005's review trigger is the duplicated rule, not this stamp. The stamp's ingredients stay in `docs/claude/adr-review-trigger-inventory.md`.
+ASM-45 points at ADR-005. The scope question is closed: seams only, adapter not built, recorded in ADR-005 on 2026-10-29. The rejected stamp's expiry still lives on that seam. ADR-005's review trigger is the duplicated rule, not this stamp. The stamp's ingredients are the beaten alternative in ASM-45.
 
 | ID | Rule | What the statement leaves open | Kind | Lives in | Proof |
 |---|---|---|---|---|---|
