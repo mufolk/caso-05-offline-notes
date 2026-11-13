@@ -10,7 +10,7 @@ describe("check", () => {
         op_id: "O1",
         note_id: "N",
         base_revision: 0,
-        text: "início",
+        text: "start",
       }),
     ).toEqual({
       ok: true,
@@ -18,7 +18,7 @@ describe("check", () => {
         op_id: "O1",
         note_id: "N",
         base_revision: 0,
-        text: "início",
+        text: "start",
       },
     });
   });
@@ -28,7 +28,7 @@ describe("check", () => {
       op_id = "O1";
       note_id = "N";
       base_revision = 0;
-      text = "início";
+      text = "start";
     }
 
     expect(check("O1")).toEqual(notPlainObject);
@@ -44,7 +44,7 @@ describe("check", () => {
         op_id: "O1",
         note_id: "N",
         base_revision: 0,
-        text: "início",
+        text: "start",
         author: "gui",
       }),
     ).toEqual({ ok: false, errors: ["extra_keys"] });
@@ -53,7 +53,7 @@ describe("check", () => {
       op_id: "O1",
       note_id: "N",
       base_revision: 0,
-      text: "início",
+      text: "start",
     };
     Object.defineProperty(withSymbol, Symbol("author"), {
       value: "gui",
@@ -82,7 +82,7 @@ describe("check", () => {
         op_id: "O1",
         note_id: null,
         base_revision: 0,
-        text: "início",
+        text: "start",
       }),
     ).toEqual({ ok: false, errors: ["note_id"] });
     expect(
@@ -90,7 +90,7 @@ describe("check", () => {
         op_id: "O1",
         note_id: undefined,
         base_revision: 0,
-        text: "início",
+        text: "start",
       }),
     ).toEqual({ ok: false, errors: ["note_id"] });
   });
@@ -101,7 +101,7 @@ describe("check", () => {
         op_id: "   ",
         note_id: "N",
         base_revision: 0,
-        text: "início",
+        text: "start",
       }),
     ).toEqual({ ok: false, errors: ["op_id"] });
 
@@ -110,7 +110,7 @@ describe("check", () => {
         op_id: "O1",
         note_id: "  A  ",
         base_revision: 0,
-        text: "  início  ",
+        text: "  start  ",
       }),
     ).toEqual({
       ok: true,
@@ -118,7 +118,7 @@ describe("check", () => {
         op_id: "O1",
         note_id: "  A  ",
         base_revision: 0,
-        text: "  início  ",
+        text: "  start  ",
       },
     });
   });
@@ -145,34 +145,34 @@ describe("check", () => {
   it("rejects a base revision that is not an integer zero or greater", () => {
     const rejected = { ok: false, errors: ["base_revision"] };
     expect(
-      check({ op_id: "O1", note_id: "N", base_revision: "1", text: "início" }),
+      check({ op_id: "O1", note_id: "N", base_revision: "1", text: "start" }),
     ).toEqual(rejected);
     expect(
-      check({ op_id: "O1", note_id: "N", base_revision: -1, text: "início" }),
+      check({ op_id: "O1", note_id: "N", base_revision: -1, text: "start" }),
     ).toEqual(rejected);
     expect(
-      check({ op_id: "O1", note_id: "N", base_revision: 1.5, text: "início" }),
+      check({ op_id: "O1", note_id: "N", base_revision: 1.5, text: "start" }),
     ).toEqual(rejected);
     expect(
-      check({ op_id: "O1", note_id: "N", base_revision: 1n, text: "início" }),
+      check({ op_id: "O1", note_id: "N", base_revision: 1n, text: "start" }),
     ).toEqual(rejected);
     expect(
       check({
         op_id: "O1",
         note_id: "N",
         base_revision: Number.NaN,
-        text: "início",
+        text: "start",
       }),
     ).toEqual(rejected);
     expect(
-      check({ op_id: "O1", note_id: "N", base_revision: null, text: "início" }),
+      check({ op_id: "O1", note_id: "N", base_revision: null, text: "start" }),
     ).toEqual(rejected);
     expect(
       check({
         op_id: "O1",
         note_id: "N",
         base_revision: undefined,
-        text: "início",
+        text: "start",
       }),
     ).toEqual(rejected);
   });
@@ -182,7 +182,7 @@ describe("check", () => {
       op_id: "O1",
       note_id: "N",
       base_revision: -0,
-      text: "início",
+      text: "start",
     });
     expect(result).toEqual({
       ok: true,
@@ -190,7 +190,7 @@ describe("check", () => {
         op_id: "O1",
         note_id: "N",
         base_revision: -0,
-        text: "início",
+        text: "start",
       },
     });
     if (!result.ok) return;
@@ -204,7 +204,7 @@ describe("check", () => {
           op_id: "O1",
           note_id: "N",
           base_revision: 0,
-          text: "início",
+          text: "start",
         }),
       ),
     ).toEqual(notPlainObject);
@@ -215,7 +215,7 @@ describe("check", () => {
       op_id: "O1",
       note_id: "N",
       base_revision: 0,
-      text: "início",
+      text: "start",
     };
     Object.defineProperty(hidden, "author", {
       value: "gui",
@@ -227,7 +227,7 @@ describe("check", () => {
         op_id: "O1",
         note_id: "N",
         base_revision: 0,
-        text: "início",
+        text: "start",
       },
     });
   });
@@ -239,7 +239,7 @@ describe("check", () => {
           op_id: "O1",
           note_id: "N",
           base_revision: 0,
-          text: "início",
+          text: "start",
         }),
       ),
     ).toEqual({
@@ -248,7 +248,7 @@ describe("check", () => {
         op_id: "O1",
         note_id: "N",
         base_revision: 0,
-        text: "início",
+        text: "start",
       },
     });
   });

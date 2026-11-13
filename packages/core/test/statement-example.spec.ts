@@ -7,47 +7,47 @@ import {
 } from "../src/index.ts";
 
 /**
- * The statement's own example ("Um exemplo"), step by step, in order.
+ * The statement's own example ("An example"), step by step, in order.
  * Each case is named after the line of the table it reproduces (EX-01..EX-08
  * in docs/reqs.md). One note N, two devices, one shared unit of work.
  */
 
-const O1 = { op_id: "O1", note_id: "N", base_revision: 0, text: "início" };
-const O2 = { op_id: "O2", note_id: "N", base_revision: 1, text: "edição A" };
-const O3 = { op_id: "O3", note_id: "N", base_revision: 1, text: "edição B" };
+const O1 = { op_id: "O1", note_id: "N", base_revision: 0, text: "start" };
+const O2 = { op_id: "O2", note_id: "N", base_revision: 1, text: "edit A" };
+const O3 = { op_id: "O3", note_id: "N", base_revision: 1, text: "edit B" };
 const O4 = { op_id: "O4", note_id: "N", base_revision: 2, text: "A + B" };
 
 describe("the statement's example, step by step", () => {
   let uow: UnitOfWork;
 
   beforeEach(() => {
-    // "Comece sem notas no servidor." REQ-01.
+    // "Start with no notes on the server." REQ-01.
     uow = createInMemoryUnitOfWork();
   });
 
-  it("EX-01 — O1, base 0, 'início': creates N at revision 1", async () => {
+  it("EX-01 — O1, base 0, 'start': creates N at revision 1", async () => {
     expect(await process(O1, uow)).toEqual({
       type: "accepted",
       op_id: "O1",
       note_id: "N",
-      text: "início",
+      text: "start",
       revision: 1,
     });
   });
 
-  it("EX-02 — O2, base 1, 'edição A': updates N to revision 2", async () => {
+  it("EX-02 — O2, base 1, 'edit A': updates N to revision 2", async () => {
     await process(O1, uow);
 
     expect(await process(O2, uow)).toEqual({
       type: "accepted",
       op_id: "O2",
       note_id: "N",
-      text: "edição A",
+      text: "edit A",
       revision: 2,
     });
   });
 
-  it("EX-03 — O3, base 1, 'edição B': conflict, N keeps 'edição A'", async () => {
+  it("EX-03 — O3, base 1, 'edit B': conflict, N keeps 'edit A'", async () => {
     await process(O1, uow);
     await process(O2, uow);
 
@@ -56,16 +56,16 @@ describe("the statement's example, step by step", () => {
       op_id: "O3",
       note_id: "N",
       base_revision: 1,
-      server_text: "edição A",
+      server_text: "edit A",
       server_revision: 2,
-      client_text: "edição B",
+      client_text: "edit B",
     });
 
-    // "N continua com 'edição A'." The conflict changed nothing.
+    // "N keeps 'edit A'." The conflict changed nothing.
     expect(await query("N", uow)).toEqual({
       type: "found",
       note_id: "N",
-      text: "edição A",
+      text: "edit A",
       revision: 2,
     });
   });
@@ -78,7 +78,7 @@ describe("the statement's example, step by step", () => {
     const resend = await process({ ...O2 }, uow);
 
     expect(resend).toEqual(first);
-    // "sem aplicar a alteração outra vez": the revision did not move.
+    // "without applying the change again": the revision did not move.
     expect(await query("N", uow)).toMatchObject({ revision: 2 });
   });
 
@@ -102,12 +102,12 @@ describe("the statement's example, step by step", () => {
     const original = await process(O3, uow);
     await process(O4, uow);
 
-    // "O resultado de um reenvio pode conter dados antigos: ele é o recibo da
-    // operação original." The note is at revision 3 by now; the receipt is not.
+    // "The result of a resend may contain stale data: it is the receipt of the
+    // original operation." The note is at revision 3 by now; the receipt is not.
     expect(await process({ ...O3 }, uow)).toEqual(original);
     expect(await process({ ...O3 }, uow)).toMatchObject({
       server_revision: 2,
-      server_text: "edição A",
+      server_text: "edit A",
     });
   });
 
@@ -129,7 +129,7 @@ describe("the statement's example, step by step", () => {
     await process(O1, uow);
     await process(O2, uow);
 
-    expect(await process({ ...O2, text: "outro texto" }, uow)).toEqual({
+    expect(await process({ ...O2, text: "other text" }, uow)).toEqual({
       type: "id_reused",
       op_id: "O2",
     });
@@ -146,26 +146,26 @@ describe("the statement's example, step by step", () => {
     expect(conflict).toMatchObject({ server_revision: 2 });
     expect(
       await process(
-        { op_id: "O5", note_id: "N", base_revision: 2, text: "escolhido" },
+        { op_id: "O5", note_id: "N", base_revision: 2, text: "chosen" },
         uow,
       ),
     ).toMatchObject({ type: "conflict", server_revision: 3 });
 
-    // "Para resolver um conflito, permita enviar outra operação, com novo
-    // op_id, o texto escolhido e a revisão base atual." REQ-21.
+    // "To resolve a conflict, allow sending another operation, with a new
+    // op_id, the chosen text, and the current base revision." REQ-21.
     const live = await query("N", uow);
     expect(live).toMatchObject({ type: "found", revision: 3 });
 
     expect(
       await process(
-        { op_id: "O6", note_id: "N", base_revision: 3, text: "escolhido" },
+        { op_id: "O6", note_id: "N", base_revision: 3, text: "chosen" },
         uow,
       ),
     ).toEqual({
       type: "accepted",
       op_id: "O6",
       note_id: "N",
-      text: "escolhido",
+      text: "chosen",
       revision: 4,
     });
   });

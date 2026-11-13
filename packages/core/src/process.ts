@@ -47,8 +47,8 @@ function stepThree(
         },
       };
     }
-    // Row 2: the statement's second branch, "ou indique que a nota ainda não
-    // existe". REQ-09. No server_text and no server_revision: they do not
+    // Row 2: the statement's second branch, "or indicate that the note does not
+    // exist yet". REQ-09. No server_text and no server_revision: they do not
     // exist, and the absence is visible in the type (ASM-19, ASM-20).
     return {
       receipt: {
@@ -102,7 +102,7 @@ function stepThree(
  *
  * The payload is `unknown` on purpose. Checking the fields is step 1, so an
  * invalid payload never reaches the registry and never occupies the `op_id`
- * — "Uma operação inválida não ocupa op_id" (REQ-13).
+ * — "An invalid operation does not occupy op_id" (REQ-13).
  */
 export async function process(
   payload: unknown,
@@ -120,11 +120,11 @@ export async function process(
     // Step 2. Registry lookup. Neither branch writes.
     const existing = await uow.findReceipt(op.op_id);
     if (existing !== undefined) {
-      // "devolva o resultado original sem aplicar a alteração outra vez"
+      // "return the original result without applying the change again"
       // (REQ-15). The stored receipt may be stale; that is the rule, not a bug
       // (REQ-19).
       if (sameContent(existing.content, op)) return existing.receipt;
-      // "Se chegar com conteúdo diferente, retorne id_reutilizado" (REQ-16).
+      // "If it arrives with different content, return id_reused" (REQ-16).
       // The code and the key, nothing else: a colliding `op_id` must not leak
       // the other client's text (ASM-40, ADR-003).
       return { type: "id_reused", op_id: op.op_id };
@@ -134,8 +134,8 @@ export async function process(
     const step = stepThree(op, await uow.findNote(op.note_id));
 
     // Step 4. One write for the pair. Every Step-3 row writes a receipt,
-    // including conflict — "guarde seu conteúdo e resultado, mesmo que tenha
-    // dado conflito" (REQ-14). No `await` follows it (ASM-28).
+    // including conflict — "store its content and result, even if it was a
+    // conflict" (REQ-14). No `await` follows it (ASM-28).
     const write: Commit = {
       op_id: op.op_id,
       content,
@@ -148,8 +148,9 @@ export async function process(
 }
 
 /**
- * RFC-001 §4.4. "Processe a fila na ordem recebida e devolva um resultado por
- * operação. Um erro ou conflito não impede as próximas" (REQ-17, REQ-18).
+ * RFC-001 §4.4. "Process the queue in the order received and return one result
+ * per operation. An error or conflict does not block the following ones"
+ * (REQ-17, REQ-18).
  *
  * A conflict is a returned value, never a throw (ADR-006), so the loop
  * continues on its own. Operation k+1 sees the note and the registry after k,

@@ -4,7 +4,7 @@
 
 ## Context
 
-The same `op_id` with the same content returns the original receipt and does not apply again. The same `op_id` with different content returns `id_reused`. The statement never defines "content", and it never says what `id_reutilizado` carries besides the error. The core's content is `{note_id, base_revision, text}`, compared with `===` on each field. `op_id` is the key, not part of the fingerprint. `id_reused` returns `{type, op_id}` and does not write.
+The same `op_id` with the same content returns the original receipt and does not apply again. The same `op_id` with different content returns `id_reused`. The statement never defines "content", and it never says what `id_reused` carries besides the error. The core's content is `{note_id, base_revision, text}`, compared with `===` on each field. `op_id` is the key, not part of the fingerprint. `id_reused` returns `{type, op_id}` and does not write.
 
 Ordering does not get its own sentence. Validate, then look up, then compare, then commit is the machine in `process`, already fixed by RFC-001 §4. "Register, then compare" would also be the wrong order if register means the write: the write is last, and only on a first arrival. The ordering is not this trade-off. This trade-off is what is hashed and what a mismatch is allowed to reveal.
 
@@ -14,7 +14,7 @@ The fingerprint is `note_id`, `base_revision`, and `text`, compared with `===` o
 
 ## Alternatives considered
 
-**The key alone, no fingerprint.** Buys a smaller row, and a resend path that always returns the stored receipt. Costs the inability to tell a retry from a reused key, so the statement's `id_reutilizado` cannot be produced. Worth choosing if the client is trusted never to reuse an id with a new payload.
+**The key alone, no fingerprint.** Buys a smaller row, and a resend path that always returns the stored receipt. Costs the inability to tell a retry from a reused key, so the statement's `id_reused` cannot be produced. Worth choosing if the client is trusted never to reuse an id with a new payload.
 
 **Return the stored receipt on collision.** Buys a useful error for the client that reused its own id and wants to see which field diverged. Costs a leak: anyone who can guess an `op_id` reads another client's text. The statement does not specify the payload of this error. Worth choosing in a single-tenant tool where that guess is not a threat.
 

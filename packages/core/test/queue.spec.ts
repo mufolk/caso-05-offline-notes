@@ -12,9 +12,9 @@ describe("processAll — the queue (RFC-001 §4.4)", () => {
 
     const results = await processAll(
       [
-        { op_id: "O1", note_id: "N", base_revision: 0, text: "início" },
-        { op_id: "O2", note_id: "N", base_revision: 1, text: "edição A" },
-        { op_id: "O3", note_id: "N", base_revision: 1, text: "edição B" },
+        { op_id: "O1", note_id: "N", base_revision: 0, text: "start" },
+        { op_id: "O2", note_id: "N", base_revision: 1, text: "edit A" },
+        { op_id: "O3", note_id: "N", base_revision: 1, text: "edit B" },
         { op_id: "O4", note_id: "N", base_revision: 2, text: "A + B" },
       ],
       uow,
@@ -34,9 +34,9 @@ describe("processAll — the queue (RFC-001 §4.4)", () => {
 
     const results = await processAll(
       [
-        { op_id: "O1", note_id: "N", base_revision: 0, text: "um" },
+        { op_id: "O1", note_id: "N", base_revision: 0, text: "one" },
         null,
-        { op_id: "O2", note_id: "N", base_revision: 1, text: "dois" },
+        { op_id: "O2", note_id: "N", base_revision: 1, text: "two" },
       ],
       uow,
     );
@@ -79,8 +79,8 @@ describe("processAll — the queue (RFC-001 §4.4)", () => {
 
     const results = await processAll(
       [
-        { op_id: "O1", note_id: "N", base_revision: 0, text: "um" },
-        { op_id: "O1", note_id: "N", base_revision: 0, text: "outro" },
+        { op_id: "O1", note_id: "N", base_revision: 0, text: "one" },
+        { op_id: "O1", note_id: "N", base_revision: 0, text: "other" },
         "not an operation",
       ],
       uow,

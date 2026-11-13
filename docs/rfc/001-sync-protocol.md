@@ -1,8 +1,8 @@
 # RFC-001 — Sync protocol for offline notes
 
-**Status:** Accepted · **Date:** 2026-10-28 · **Author:** Gui · **File:** `docs/rfc/001-protocolo-de-sincronizacao.md`
+**Status:** Accepted · **Date:** 2026-10-28 · **Author:** Gui · **File:** `docs/rfc/001-sync-protocol.md`
 
-Quotes from the problem statement are kept in the original Portuguese, word for word. The body is the protocol accepted after the red-team pass of 2026-10-27/28. Own choices — rules the statement does not give — are marked as such. The requirements matrix (`docs/reqs.md`) is extracted from the statement, not from this file; this RFC is the pointer column, not the source of the REQs.
+Quotes from the problem statement are in English, as in `docs/case-05-statement.md`. The body is the protocol accepted after the red-team pass of 2026-10-27/28. Own choices — rules the statement does not give — are marked as such. The requirements matrix (`docs/reqs.md`) is extracted from the statement, not from this file; this RFC is the pointer column, not the source of the REQs.
 
 ---
 
@@ -18,9 +18,9 @@ Disconnected clients edit the same note and send operations that arrive duplicat
 
 | Non-goal | Authority |
 |---|---|
-| No automatic merge | *“Não junte os textos automaticamente nem use o relógio do dispositivo para escolher um vencedor.”* |
+| No automatic merge | *“Do not merge the texts automatically, and do not use the device clock to pick a winner.”* |
 | No clock-based resolution | Same sentence |
-| No deletion, no real-time editing | *“Não precisa implementar exclusão, mesclagem automática, edição em tempo real, armazenamento em disco ou comunicação HTTP.”* |
+| No deletion, no real-time editing | *“You do not need to implement deletion, automatic merging, real-time editing, disk storage, or HTTP communication.”* |
 | No disk, no HTTP in the core | Same sentence. The optional envelope (NestJS) is justified in ADR-005. |
 | No authentication | Own choice, not a quote |
 
@@ -57,17 +57,17 @@ An error or conflict never blocks the next operations in the queue: one result p
 
 ### 4.1 Predicates
 
-Authority: *“Antes de processar, confira os campos da operação. Uma operação inválida não ocupa `op_id`.”* *“Uma alteração enviada pelo cliente tem `op_id`, `note_id`, `base_revision` e texto.”*
+Authority: *“Before processing, check the operation's fields. An invalid operation does not occupy `op_id`.”* *“A change sent by the client has `op_id`, `note_id`, `base_revision`, and text.”*
 
-A payload that fails this check is not an operation. It does not “chegar”. The registry is not read. Nothing is stored. The result is `invalid`. That name belongs only to `process`. `query` uses the `note_id` rule below and returns `malformed` on `QueryResult`.
+A payload that fails this check is not an operation. It does not “arrive”. The registry is not read. Nothing is stored. The result is `invalid`. That name belongs only to `process`. `query` uses the `note_id` rule below and returns `malformed` on `QueryResult`.
 
 **Own choices**
 
 - Closed key set, no unknown fields. One client; way out is an explicit version and a new accepted key set (ADR-007: Zod `.strict()` at the edge expresses this; the core implements the same rule with no library).
 - No coercion, no trim of stored values. Validate emptiness on the trimmed string; store as sent.
 - `op_id` / `note_id`: non-empty after trim. UUID is not required (the official table uses O1).
-- `text: ""` is legal. The statement says texto, not texto não vazio, and increments on identical text.
-- `base_revision` is a finite integer `>= 0`. The statement says “número de revisão”; this is the closed reading.
+- `text: ""` is legal. The statement says text, not non-empty text, and increments on identical text.
+- `base_revision` is a finite integer `>= 0`. The statement says “revision number”; this is the closed reading.
 - Content of a valid op is `{note_id, base_revision, text}` with `===` on each field. `op_id` is the key, not the fingerprint.
 - No length cap on `text`, `op_id`, or `note_id` in the core. The bound lives at the HTTP edge, where the body size is already limited.
 
@@ -99,7 +99,7 @@ else the payload is an operation; content = {note_id, base_revision, text}
 
 Runs only for a **valid first arrival**. Predicates have passed. The registry has no receipt for this `op_id`. Resend and `id_reused` never reach this table.
 
-Authority: *“Uma nota é criada na revisão 1 quando o cliente envia a revisão base 0.”* *“Para alterar uma nota existente, a revisão base deve ser igual à revisão atual no servidor. Se for aceita, a alteração troca o texto e aumenta a revisão em 1, mesmo que o texto enviado seja igual ao anterior.”* *“Quando a revisão base não corresponder à esperada, retorne `conflito` e os dados atuais do servidor, ou indique que a nota ainda não existe. Preserve o texto do servidor e a proposta do cliente no resultado dessa operação.”*
+Authority: *“A note is created at revision 1 when the client sends base revision 0.”* *“To change an existing note, the base revision must equal the current revision on the server. If it is accepted, the change replaces the text and increases the revision by 1, even if the sent text is the same as the previous one.”* *“When the base revision does not match the expected one, return `conflict` and the server's current data, or indicate that the note does not exist yet. Preserve the server's text and the client's proposal in the result of that operation.”*
 
 `current` exists only if the note exists. Do not write `note?.revision ?? 0`. After the predicates, `base_revision` is an integer `>= 0`.
 
@@ -207,7 +207,7 @@ return uow.run(() => {
 
 ### 4.4 Queue
 
-Authority: *“Processe a fila na ordem recebida e devolva um resultado por operação. Um erro ou conflito não impede as próximas.”*
+Authority: *“Process the queue in the order received and return one result per operation. An error or conflict does not block the following ones.”*
 
 ```
 processAll(ops, uow) → for (op of ops) await process(op, uow)
@@ -221,7 +221,7 @@ A conflict is a returned value. The loop continues, and the catch in §4.3 does 
 
 A second entry point. Not an operation. No `op_id`, no content, no receipt.
 
-Authority: *“Uma consulta separada deve mostrar a nota como está agora.”* *“O resultado de um reenvio pode conter dados antigos: ele é o recibo da operação original.”* *“Para resolver um conflito, permita enviar outra operação, com novo `op_id`, o texto escolhido e a revisão base atual.”*
+Authority: *“A separate query must show the note as it is now.”* *“The result of a resend may contain stale data: it is the receipt of the original operation.”* *“To resolve a conflict, allow sending another operation, with a new `op_id`, the chosen text, and the current base revision.”*
 
 `query` is the live read. A resend is the frozen write. Those are different verbs.
 
@@ -274,17 +274,17 @@ No other fields on `found`. No timestamp. No receipts.
 
 This table is only `process`. `query` returns `QueryResult` and does not appear here.
 
-Authority: *“Uma operação inválida não ocupa `op_id`.”* *“Para cada operação válida recebida pela primeira vez, guarde seu conteúdo e resultado, mesmo que tenha dado conflito.”* *“Se o mesmo `op_id` chegar de novo com o mesmo conteúdo, devolva o resultado original sem aplicar a alteração outra vez. Se chegar com conteúdo diferente, retorne `id_reutilizado`.”*
+Authority: *“An invalid operation does not occupy `op_id`.”* *“For each valid operation received for the first time, store its content and result, even if it was a conflict.”* *“If the same `op_id` arrives again with the same content, return the original result without applying the change again. If it arrives with different content, return `id_reused`.”*
 
-A payload is an operation only after the predicates. “Chegar de novo” means a **valid** second arrival.
+A payload is an operation only after the predicates. “Arriving again” means a **valid** second arrival.
 
 | Result | The statement's word | Writes a receipt? | What a later **valid** payload with this `op_id` does |
 |---|---|---|---|
-| `invalid` | não ocupa `op_id` | no | This result does not speak about the registry. If no receipt exists, the next valid payload occupies. If one exists, that payload is a resend or `id_reused`. |
-| `id_reused` | *id_reutilizado* | no — a receipt already exists for this id | This message is discarded. The stored receipt is unchanged. |
+| `invalid` | does not occupy `op_id` | no | This result does not speak about the registry. If no receipt exists, the next valid payload occupies. If one exists, that payload is a resend or `id_reused`. |
+| `id_reused` | *id_reused* | no — a receipt already exists for this id | This message is discarded. The stored receipt is unchanged. |
 | `accepted` | — | yes | Same content → that receipt, no apply. Different content → `id_reused`. |
-| `conflict` | *conflito* | yes | Same. Frozen pair stays frozen. |
-| `note_not_found` | “indique que a nota ainda não existe” | yes | Same. Stale if the note is later created. |
+| `conflict` | *conflict* | yes | Same. Frozen pair stays frozen. |
+| `note_not_found` | “indicate that the note does not exist yet” | yes | Same. Stale if the note is later created. |
 
 There is no column “`invalid` ⇒ id reusable”. Reusability is a property of the registry, not of this message.
 
@@ -348,9 +348,9 @@ Two devices, note N. After this RFC, the sequence must hold without a special ca
 
 | Op | Sent | Result |
 |---|---|---|
-| O1 | base 0, “início” | accepted, N revision 1 |
-| O2 | base 1, “edição A” | accepted, N revision 2 |
-| O3 | base 1, “edição B” | `conflict`; N keeps “edição A”; receipt freezes revision 2 and both texts |
+| O1 | base 0, “start” | accepted, N revision 1 |
+| O2 | base 1, “edit A” | accepted, N revision 2 |
+| O3 | base 1, “edit B” | `conflict`; N keeps “edit A”; receipt freezes revision 2 and both texts |
 | Resend O2 | same content | original accepted receipt for revision 2; no second apply |
 | O4 | base 2, “A + B” | accepted, N revision 3 |
 | Resend O3 | same content | original `conflict` at revision 2 |

@@ -2,7 +2,7 @@ import type { QueryResult } from "contracts";
 import type { UnitOfWork } from "./uow.ts";
 
 /**
- * RFC-001 §4.5. "Uma consulta separada deve mostrar a nota como está agora"
+ * RFC-001 §4.5. "A separate query must show the note as it is now"
  * (REQ-20). A second entry point, not an operation: no `op_id`, no content,
  * no receipt.
  *

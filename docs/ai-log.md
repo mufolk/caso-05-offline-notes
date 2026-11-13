@@ -8,11 +8,11 @@ The assistant framed a base ahead of the server as a choice between `invalid` an
 
 ## 2. Two refusals to write the review triggers
 
-Asked twice for the review-trigger text. The fields stayed blank, and the inventory stayed raw material: the status line imported in `4713536` says no review-trigger field is written there, and that commit message says both ADR notes remain blank by rule. Checked against the plan's prohibition on the AI writing **Decisão** and **Gatilho de revisão**; the sentences in the files now are the ones dictated on 2026-10-29, in `1b12764`, on top of the empty structure at `a6fe2da`.
+Asked twice for the review-trigger text. The fields stayed blank, and the inventory stayed raw material: the status line imported in `4713536` says no review-trigger field is written there, and that commit message says both ADR notes remain blank by rule. Checked against the plan's prohibition on the AI writing **Decision** and **Review trigger**; the sentences in the files now are the ones dictated on 2026-10-29, in `1b12764`, on top of the empty structure at `a6fe2da`.
 
 ## 3. The red-team order, adopted and then reversed
 
-The red-team order, adopted in that sitting, looked up a known `op_id` before the rest of the fields, so a stored id with a field missing came back `id_reutilizado`. Reversed the same night: that order was the reviewer's, and a payload that fails the field check is not an operation, so it does not reuse an id and it does not replay a receipt. Checked against *"Antes de processar, confira os campos da operação. Uma operação inválida não ocupa op_id."*, against the order in RFC-001 §4 (predicates, then registry lookup), and against `process.spec.ts` → *REQ-13 — an invalid payload does not occupy the op_id*.
+The red-team order, adopted in that sitting, looked up a known `op_id` before the rest of the fields, so a stored id with a field missing came back `id_reused`. Reversed the same night: that order was the reviewer's, and a payload that fails the field check is not an operation, so it does not reuse an id and it does not replay a receipt. Checked against *"Before processing, check the operation's fields. An invalid operation does not occupy op_id."*, against the order in RFC-001 §4 (predicates, then registry lookup), and against `process.spec.ts` → *REQ-13 — an invalid payload does not occupy the op_id*.
 
 ## 4. The Cursor and Claude trailers, kept
 
@@ -20,7 +20,7 @@ The red-team order, adopted in that sitting, looked up a known `op_id` before th
 
 ## 5. 2026-10-29 — the adversarial pass called every row met
 
-The pass had the statement, the code, and the matrix, and returned twenty-two met with an empty "não verificável" column. For REQ-10 it cited `text: op.text` with no concatenation; for REQ-11 it cited that no source file reads a clock. I did not keep that as proof. The README already called both rows absences, and a verdict that reads the implementation and calls the reading evidence is green and wrong. REQ-10 is now the test that fails if the texts are joined. REQ-11 stays declared: stubbing the clock on one path does not show it is never read.
+The pass had the statement, the code, and the matrix, and returned twenty-two met with an empty "not verifiable" column. For REQ-10 it cited `text: op.text` with no concatenation; for REQ-11 it cited that no source file reads a clock. I did not keep that as proof. The README already called both rows absences, and a verdict that reads the implementation and calls the reading evidence is green and wrong. REQ-10 is now the test that fails if the texts are joined. REQ-11 stays declared: stubbing the clock on one path does not show it is never read.
 
 ## 6. 2026-10-30 — the review trigger has to say what makes the decision wrong
 

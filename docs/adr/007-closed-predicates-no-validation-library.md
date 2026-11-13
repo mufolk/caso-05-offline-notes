@@ -8,7 +8,7 @@ Zod `.strict()` stays a legal later copy of the same rule, at that adapter, when
 
 ## Context
 
-"Confira os campos da operação" does not say whether an unknown field is tolerated. The core rejects a payload that is not a plain object and rejects any enumerable own key outside `{op_id, note_id, base_revision, text}`. Emptiness is checked on the trimmed `op_id` and `note_id` only. `text` is a string, and `""` is legal (ASM-11). The value is stored as sent. A failure is `invalid`, names the predicates, and does not consult the registry.
+"Check the operation's fields" does not say whether an unknown field is tolerated. The core rejects a payload that is not a plain object and rejects any enumerable own key outside `{op_id, note_id, base_revision, text}`. Emptiness is checked on the trimmed `op_id` and `note_id` only. `text` is a string, and `""` is legal (ASM-11). The value is stored as sent. A failure is `invalid`, names the predicates, and does not consult the registry.
 
 ## Decision
 

@@ -3,8 +3,8 @@
  * sequence and prints receipts."
  *
  * The scenario is deliberately NOT the statement's example — that one is in
- * `test/exemplo-do-statement.spec.ts`. This is a different sequence, so it can
- * also serve as the video's "cenário diferente do exemplo".
+ * `test/statement-example.spec.ts`. This is a different sequence, so it can
+ * also serve as the video's "a scenario different from the example".
  *
  * Every step declares what it expects before it runs. The script compares the
  * declaration with what happened and exits non-zero on any mismatch, so the
@@ -128,8 +128,8 @@ await op(
 );
 
 // The rule most implementations get wrong: the stored receipt is never
-// refreshed. "O resultado de um reenvio pode conter dados antigos: ele é o
-// recibo da operação original."
+// refreshed. "The result of a resend may contain stale data: it is the
+// receipt of the original operation."
 await op(
   "the phone resends p2 once more, now that the note is at revision 3",
   "STILL the original conflict, frozen at revision 2 — a receipt is never refreshed",

@@ -88,11 +88,11 @@ describe("process — the revision table (RFC-001 §4.2)", () => {
   });
 
   it("REQ-07, REQ-08 — conflict preserves the server text and the client proposal", async () => {
-    await process(op({ text: "do servidor" }), uow);
+    await process(op({ text: "from the server" }), uow);
 
     expect(
       await process(
-        op({ op_id: "B", base_revision: 0, text: "do cliente" }),
+        op({ op_id: "B", base_revision: 0, text: "from the client" }),
         uow,
       ),
     ).toEqual({
@@ -100,15 +100,15 @@ describe("process — the revision table (RFC-001 §4.2)", () => {
       op_id: "B",
       note_id: "N",
       base_revision: 0,
-      server_text: "do servidor",
+      server_text: "from the server",
       server_revision: 1,
-      client_text: "do cliente",
+      client_text: "from the client",
     });
   });
 
   it("REQ-10 — an accepted note's text is the operation's text, and a conflict returns each input unjoined", async () => {
-    const sent = "edição A";
-    const proposal = "edição B";
+    const sent = "edit A";
+    const proposal = "edit B";
 
     const accepted = await process(op({ text: sent }), uow);
     expect(accepted.type).toBe("accepted");
@@ -118,7 +118,7 @@ describe("process — the revision table (RFC-001 §4.2)", () => {
     expect(found.type).toBe("found");
     if (found.type === "found") expect(found.text === sent).toBe(true);
 
-    // "Não junte os textos automaticamente." A join is a third string.
+    // "Do not merge the texts automatically." A join is a third string.
     const conflict = await process(
       op({ op_id: "B", base_revision: 0, text: proposal }),
       uow,
@@ -131,13 +131,13 @@ describe("process — the revision table (RFC-001 §4.2)", () => {
   });
 
   it("base 0 on a live note is a conflict, not a reset", async () => {
-    await process(op({ text: "vivo" }), uow);
-    await process(op({ op_id: "B", base_revision: 1, text: "vivo 2" }), uow);
+    await process(op({ text: "live" }), uow);
+    await process(op({ op_id: "B", base_revision: 1, text: "live 2" }), uow);
 
     expect(await process(op({ op_id: "C", base_revision: 0 }), uow)).toMatchObject(
       { type: "conflict", server_revision: 2 },
     );
-    expect(await query("N", uow)).toMatchObject({ revision: 2, text: "vivo 2" });
+    expect(await query("N", uow)).toMatchObject({ revision: 2, text: "live 2" });
   });
 
   it("a base ahead of the server's revision is the same conflict", async () => {
@@ -156,16 +156,16 @@ describe("process — idempotency (RFC-001 §5)", () => {
   });
 
   it("REQ-14 — a conflict is stored and resending it returns the frozen pair", async () => {
-    await process(op({ text: "servidor" }), uow);
+    await process(op({ text: "server" }), uow);
     const conflict = await process(
-      op({ op_id: "B", base_revision: 0, text: "cliente" }),
+      op({ op_id: "B", base_revision: 0, text: "client" }),
       uow,
     );
     // The note moves on after the conflict was recorded.
-    await process(op({ op_id: "C", base_revision: 1, text: "depois" }), uow);
+    await process(op({ op_id: "C", base_revision: 1, text: "later" }), uow);
 
     expect(
-      await process(op({ op_id: "B", base_revision: 0, text: "cliente" }), uow),
+      await process(op({ op_id: "B", base_revision: 0, text: "client" }), uow),
     ).toEqual(conflict);
   });
 
@@ -186,7 +186,7 @@ describe("process — idempotency (RFC-001 §5)", () => {
    */
   describe("ASM-39 — a colliding op_id does not disturb the stored row", () => {
     const first = op({ op_id: "X", base_revision: 0, text: "original" });
-    const colliding = op({ op_id: "X", base_revision: 0, text: "outro" });
+    const colliding = op({ op_id: "X", base_revision: 0, text: "other" });
 
     it("the colliding content returns id_reused", async () => {
       await process(first, uow);
@@ -230,9 +230,9 @@ describe("process — idempotency (RFC-001 §5)", () => {
    * with the other client's text riding along; only `toEqual` fails on it.
    */
   it("ASM-40 — id_reused is exactly { type, op_id } and leaks no stored text", async () => {
-    await process(op({ op_id: "X", text: "texto do outro cliente" }), uow);
+    await process(op({ op_id: "X", text: "the other client's text" }), uow);
 
-    const result = await process(op({ op_id: "X", text: "meu texto" }), uow);
+    const result = await process(op({ op_id: "X", text: "my text" }), uow);
 
     expect(result).toEqual({ type: "id_reused", op_id: "X" });
     expect(Object.keys(result).sort()).toEqual(["op_id", "type"]);

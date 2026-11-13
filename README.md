@@ -1,6 +1,6 @@
 # Case 05 — Offline note sync
 
-**Focus:** back end and architecture. **Case:** 05, "Sincronização de notas offline".
+**Focus:** back end and architecture. **Case:** 05, "Offline note sync".
 
 **Time:** the in-memory core, the demonstration, and the documents in this repository.
 The plan of attack's split — about 4 hours for the core, plus about 11 hours for an
@@ -51,12 +51,12 @@ The three steps worth watching:
 ## 3. How it is laid out
 
 ```
-packages/contracts   types only — the protocol's shapes, no logic
-packages/core        the whole challenge: predicates, process, processAll, query
-demo/                the runnable demonstration (not part of the core)
-docs/rfc/001-…       the protocol, written before the first line of code
-docs/reqs.md         every obligation in the statement, numbered, with the verbatim quote
-docs/assumptions.md  every rule the solution obeys that the statement does not decide
+packages/contracts             types only — the protocol's shapes, no logic
+packages/core                  the whole challenge: predicates, process, processAll, query
+demo/                          the runnable demonstration (not part of the core)
+docs/rfc/001-sync-protocol.md  the protocol, written before the first line of code
+docs/reqs.md                   every obligation in the statement, numbered, with the quote
+docs/assumptions.md            every rule the solution obeys that the statement does not decide
 ```
 
 The core is `process(payload, uow)` and `query(note_id, uow)`, over a `UnitOfWork` it
@@ -70,7 +70,7 @@ after the idempotency lookup would let a malformed payload burn an `op_id` forev
 ## 4. Requirements matrix
 
 Every sentence of the statement carrying an obligation is numbered in `docs/reqs.md`
-with its verbatim Portuguese quote. This table is that file's REQ ↔ test mapping,
+with its quote from the statement. This table is that file's REQ ↔ test mapping,
 without the quotes. One row is an absence rather than behaviour, and says why it is declared instead of tested.
 
 | ID | Requirement | Proof |
@@ -90,16 +90,16 @@ without the quotes. One row is an absence rather than behaviour, and says why it
 | REQ-13 | An invalid operation does not take up an `op_id`. | `process` → an invalid payload does not occupy the op_id |
 | REQ-14 | For every valid operation received for the first time, store its content and result, even if it was a conflict. | `process` → a conflict is stored and resending it returns the frozen pair |
 | REQ-15 | If the same `op_id` arrives again with the same content, return the original result without applying the change again. | `process` → a resend does not apply the change a second time |
-| REQ-16 | If the same `op_id` arrives with different content, return `id_reused`. | `exemplo-do-statement` → reusing O2 with a different text is an error |
+| REQ-16 | If the same `op_id` arrives with different content, return `id_reused`. | `statement-example` → reusing O2 with a different text is an error |
 | REQ-17 | Process the queue in the order received and return one result per operation. | `queue` → one result per operation, in the order received |
 | REQ-18 | An error or conflict does not block the following operations. | `queue` → a conflict in the middle does not block the rest |
-| REQ-19 | The result of a resend may contain stale data: it is the receipt of the original operation. | `exemplo-do-statement` → resend of O3 still shows the original conflict, at revision 2 |
-| REQ-20 | A separate query must show the note as it is now. | `exemplo-do-statement` → a query shows revision 3 |
-| REQ-21 | To resolve a conflict, allow sending another operation with a new `op_id`, the chosen text and the current base revision. | `exemplo-do-statement` → EX-05 — O4, base 2, 'A + B': updates N to revision 3 |
+| REQ-19 | The result of a resend may contain stale data: it is the receipt of the original operation. | `statement-example` → resend of O3 still shows the original conflict, at revision 2 |
+| REQ-20 | A separate query must show the note as it is now. | `statement-example` → a query shows revision 3 |
+| REQ-21 | To resolve a conflict, allow sending another operation with a new `op_id`, the chosen text and the current base revision. | `statement-example` → EX-05 — O4, base 2, 'A + B': updates N to revision 3 |
 | REQ-22 | Each note has an id, a text and a revision number. | `query` → found shows the note as it is now, with its three fields |
 
 The statement's own example runs as its own spec, step by step, named after the lines of
-its table: `packages/core/test/exemplo-do-statement.spec.ts`.
+its table: `packages/core/test/statement-example.spec.ts`.
 
 ## 5. Three tests worth your time
 
@@ -107,11 +107,11 @@ Each of these catches a whole class of bug rather than one case.
 
 **1 — A resent conflict returns the original conflict, with the revision of that moment.**
 `process.spec.ts` → *REQ-14 — a conflict is stored and resending it returns the frozen pair*,
-and `exemplo-do-statement.spec.ts` → *EX-06*.
+and `statement-example.spec.ts` → *EX-06*.
 Catches the single most tempting bug in this challenge: "helpfully" refreshing a stored
-receipt with the current server state. The statement forbids it in one clause — *"O
-resultado de um reenvio pode conter dados antigos: ele é o recibo da operação
-original."* An implementation that refreshes passes every other test in the suite.
+receipt with the current server state. The statement forbids it in one clause — *"The
+result of a resend may contain stale data: it is the receipt of the original
+operation."* An implementation that refreshes passes every other test in the suite.
 
 **2 — The same `op_id` with different text returns `id_reused`, and nothing else.**
 `process.spec.ts` → *ASM-40 — id_reused is exactly { type, op_id } and leaks no stored text*.
@@ -173,7 +173,7 @@ opens with the fact that makes that decision wrong, and names the exit.
 ## 8. What I did not do, and why
 
 - **No HTTP API, no database, no UI.** The statement explicitly does not ask for them
-  (*"Não precisa implementar … armazenamento em disco ou comunicação HTTP"*). A NestJS +
+  (*"You do not need to implement … disk storage or HTTP communication"*). A NestJS +
   Postgres envelope is planned and not built; the seam it would attach to is the
   `UnitOfWork` type, which is why that type exists at all.
 - **No real parallelism.** One global writer lock, one process. Two servers break it, and
